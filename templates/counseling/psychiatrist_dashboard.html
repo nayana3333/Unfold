@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Psychiatrist Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .dashboard-header {
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+  }
+  
+  .dashboard-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .booking-item {
+    padding: 16px;
+    border: 2px solid #f0f0f0;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .action-btn {
+    background: #F4A6B5;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container care-dashboard-shell">
+  <div class="dashboard-header care-dashboard-hero">
+    <span class="section-kicker">Psychiatrist workspace</span>
+    <h1>Session command center.</h1>
+    <p style="margin: 8px 0 0; opacity: 0.95;">Welcome, Dr. {{ profile.full_name }}. Review today, confirm requests, and manage open slots.</p>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h3 style="margin:0;">{{ pending_bookings|length }}</h3>
+        <p class="text-muted" style="margin:4px 0 0;">Pending requests</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h3 style="margin:0;">{{ confirmed_count }}</h3>
+        <p class="text-muted" style="margin:4px 0 0;">Confirmed sessions</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h3 style="margin:0;">{{ available_slot_count }}</h3>
+        <p class="text-muted" style="margin:4px 0 0;">Open slots</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="dashboard-card">
+        <h3>Today's Appointments</h3>
+        {% if today_bookings %}
+          {% for booking in today_bookings %}
+          <div class="booking-item">
+            <strong>{{ booking.user.username }}</strong> - {{ booking.slot.start|date:"g:i A" }}
+            <a href="{% url 'counseling:session' booking.id %}" class="action-btn">Start Session</a>
+            <form method="post" action="{% url 'counseling:update_booking_status' booking.id 'completed' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="action-btn secondary">Mark complete</button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="care-mini-empty">No appointments scheduled for today.</div>
+        {% endif %}
+      </div>
+      
+      <div class="dashboard-card">
+        <h3>Pending Requests</h3>
+        {% if pending_bookings %}
+          {% for booking in pending_bookings %}
+          <div class="booking-item">
+            <strong>{{ booking.user.username }}</strong> - {{ booking.slot.start|date:"M d, Y g:i A" }}
+            <span class="status-badge">{{ booking.get_status_display }}</span>
+            <form method="post" action="{% url 'counseling:update_booking_status' booking.id 'confirmed' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="action-btn">Confirm</button>
+            </form>
+            <form method="post" action="{% url 'counseling:update_booking_status' booking.id 'cancelled' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="action-btn secondary">Decline</button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="care-mini-empty">No pending requests.</div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="dashboard-card">
+        <h5>Upcoming Slots</h5>
+        {% for slot in upcoming_slots|slice:":5" %}
+        <div class="small mb-2">
+          {{ slot.start|date:"M d, g:i A" }} - 
+          {% if slot.is_booked %}Booked{% else %}Available{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

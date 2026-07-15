@@ -1,0 +1,142 @@
+<div class="stories-container mb-4">
+    <h4 class="mb-3">Recent Activity</h4>
+    <div class="stories-scroll">
+
+        <!-- Active Stories -->
+        {% for story in stories %}
+        <div class="story-item">
+            <a href="{% url 'stories:story_detail' story.pk %}" class="story-link">
+                <div class="story-avatar has-story">
+                    {% if story.is_anonymous %}
+                        <div class="story-initials">{{ story.display_initial }}</div>
+                    {% elif story.user.profile and story.user.profile.image %}
+                        <img src="{{ story.user.profile.image.url }}" alt="{{ story.user.username }}" class="story-image">
+                    {% else %}
+                        <div class="story-initials">{{ story.user.username|first|upper }}</div>
+                    {% endif %}
+                </div>
+                <div class="story-username">{{ story.display_name|truncatechars:10 }}</div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="no-stories">
+            <p>No active stories. Be the first to share!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.stories-container {
+    background: white;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    padding: 16px 0;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.stories-scroll {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 16px;
+    gap: 20px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.stories-scroll::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.story-item {
+    flex: 0 0 auto;
+    text-align: center;
+    width: 80px;
+}
+
+.story-link {
+    text-decoration: none;
+    color: #262626;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.story-avatar {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.story-avatar.add-story {
+    background: #e6e6e6;
+}
+
+.story-avatar.has-story {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
+.story-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+}
+
+.story-initials {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #333;
+    font-size: 24px;
+    border: 2px solid white;
+}
+
+.add-story-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #3897f0;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid white;
+}
+
+.story-username {
+    font-size: 12px;
+    color: #262626;
+    margin-top: 4px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.no-stories {
+    padding: 20px;
+    text-align: center;
+    color: #8e8e8e;
+    width: 100%;
+}
+</style>

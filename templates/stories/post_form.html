@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Create Post - Unfold{% endblock %}
+
+{% block content %}
+<div class="post-composer-page">
+  <section class="post-composer-hero">
+    <div>
+      <span class="section-kicker">Create</span>
+      <h1>Share something worth holding onto.</h1>
+      <p>Post a thought, image, or resource for your Unfold circle. You can stay anonymous whenever you need privacy.</p>
+    </div>
+  </section>
+
+  <form method="post" enctype="multipart/form-data" class="post-composer-card">
+    {% csrf_token %}
+    <div class="composer-author-row">
+      {% if user.profile and user.profile.image %}
+        <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="composer-avatar">
+      {% else %}
+        <span class="composer-avatar avatar-initial">{{ user.username|first|upper }}</span>
+      {% endif %}
+      <div>
+        <strong>{{ user.get_full_name|default:user.username }}</strong>
+        <span>Posting to Unfold</span>
+      </div>
+    </div>
+
+    <label for="content">Thought</label>
+    <textarea id="content" name="content" rows="7" placeholder="What's unfolding today?"></textarea>
+
+    <div class="composer-upload-grid">
+      <label class="composer-upload-tile" id="standaloneDropZone">
+        <i class="fa-regular fa-image"></i>
+        <span>Add photos</span>
+        <small>Drag photos here or browse</small>
+        <input type="file" id="standaloneImagesInput" name="images" accept="image/*" multiple onchange="previewStandalonePostImages(this)">
+      </label>
+      <label class="composer-upload-tile">
+        <i class="fa-solid fa-paperclip"></i>
+        <span>Attach file</span>
+        <input type="file" name="file">
+      </label>
+    </div>
+    <div id="standalonePostPreview" class="image-preview composer-preview composer-preview-wrap carousel-preview-grid" style="display:none;"></div>
+
+    <div class="composer-options">
+      <label class="modal-checkbox">
+        <input class="form-check-input" type="checkbox" value="on" id="anonCheck" name="is_anonymous" onchange="toggleStandalonePseudonym()">
+        <span>Post anonymously</span>
+      </label>
+      <label class="modal-checkbox">
+        <input class="form-check-input" type="checkbox" value="on" id="allowComments" name="allow_comments" checked>
+        <span>Allow comments</span>
+      </label>
+    </div>
+
+    <div id="standalonePseudonym" style="display:none;">
+      <label for="pseudonym">Anonymous display name</label>
+      <input id="pseudonym" type="text" name="pseudonym" placeholder="Leave blank for Anonymous">
+    </div>
+
+    <div class="composer-submit-row">
+      <span id="standaloneComposerStatus">Your post will appear in the feed after publishing.</span>
+      <div class="composer-submit-actions">
+        <a href="{% url 'home' %}" class="profile-action">Cancel</a>
+        <button type="submit" class="profile-action primary" id="standalonePublishBtn">Publish</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleStandalonePseudonym() {
+  const group = document.getElementById('standalonePseudonym');
+  const input = document.getElementById('pseudonym');
+  const anon = document.getElementById('anonCheck');
+  group.style.display = anon.checked ? 'block' : 'none';
+  if (!anon.checked) input.value = '';
+}
+
+let standaloneComposerManager = null;
+
+function createPhotoComposerManager({ inputId, previewId, dropZoneId, statusId }) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  const dropZone = document.getElementById(dropZoneId);
+  const status = document.getElementById(statusId);
+  let files = [];
+
+  function syncInput() {
+    if (!input) return;
+    const transfer = new DataTransfer();
+    files.forEach(file => transfer.items.add(file));
+    input.files = transfer.files;
+  }
+
+  function updateStatus() {
+    if (!status) return;
+    status.textContent = files.length
+      ? `${files.length} photo${files.length === 1 ? '' : 's'} selected. Use arrows to reorder.`
+      : 'Your post will appear in the feed after publishing.';
+  }
+
+  function render() {
+    if (!preview) return;
+    preview.innerHTML = '';
+    if (!files.length) {
+      preview.style.display = 'none';
+      updateStatus();
+      return;
+    }
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'composer-preview-toolbar';
+    toolbar.innerHTML = `<strong>${files.length} photo${files.length === 1 ? '' : 's'} selected</strong><button type="button">Clear all</button>`;
+    toolbar.querySelector('button').addEventListener('click', clear);
+    preview.appendChild(toolbar);
+
+    files.forEach((file, index) => {
+      const item = document.createElement('div');
+      item.className = 'carousel-preview-item composer-sortable-item';
+      item.draggable = true;
+      item.dataset.index = String(index);
+      const reader = new FileReader();
+      reader.onload = event => {
+        item.innerHTML = `
+          <img src="${event.target.result}" alt="Selected post image ${index + 1}">
+          <div class="composer-image-actions">
+            <button type="button" data-move="-1" aria-label="Move photo left"><i class="fa-solid fa-arrow-left"></i></button>
+            <button type="button" data-move="1" aria-label="Move photo right"><i class="fa-solid fa-arrow-right"></i></button>
+            <button type="button" data-remove aria-label="Remove photo"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <span class="composer-image-order">${index + 1}</span>
+        `;
+      };
+      reader.readAsDataURL(file);
+      preview.appendChild(item);
+    });
+    preview.style.display = 'grid';
+    updateStatus();
+  }
+
+  function setFiles(fileList) {
+    files = Array.from(fileList || []).filter(file => file.type.startsWith('image/')).slice(0, 10);
+    syncInput();
+    render();
+  }
+
+  function clear() {
+    files = [];
+    if (input) input.value = '';
+    syncInput();
+    render();
+  }
+
+  function move(from, to) {
+    if (to < 0 || to >= files.length) return;
+    const [file] = files.splice(from, 1);
+    files.splice(to, 0, file);
+    syncInput();
+    render();
+  }
+
+  function remove(index) {
+    files.splice(index, 1);
+    syncInput();
+    render();
+  }
+
+  preview?.addEventListener('click', event => {
+    const item = event.target.closest('.composer-sortable-item');
+    if (!item) return;
+    const index = parseInt(item.dataset.index, 10);
+    const removeButton = event.target.closest('[data-remove]');
+    const moveButton = event.target.closest('[data-move]');
+    if (removeButton) remove(index);
+    if (moveButton) move(index, index + parseInt(moveButton.dataset.move, 10));
+  });
+
+  let dragIndex = null;
+  preview?.addEventListener('dragstart', event => {
+    const item = event.target.closest('.composer-sortable-item');
+    if (!item) return;
+    dragIndex = parseInt(item.dataset.index, 10);
+    item.classList.add('dragging');
+  });
+  preview?.addEventListener('dragend', event => {
+    event.target.closest('.composer-sortable-item')?.classList.remove('dragging');
+    dragIndex = null;
+  });
+  preview?.addEventListener('dragover', event => {
+    if (dragIndex === null) return;
+    event.preventDefault();
+  });
+  preview?.addEventListener('drop', event => {
+    const item = event.target.closest('.composer-sortable-item');
+    if (!item || dragIndex === null) return;
+    event.preventDefault();
+    move(dragIndex, parseInt(item.dataset.index, 10));
+  });
+
+  ['dragenter', 'dragover'].forEach(type => {
+    dropZone?.addEventListener(type, event => {
+      event.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(type => {
+    dropZone?.addEventListener(type, () => dropZone.classList.remove('drag-over'));
+  });
+  dropZone?.addEventListener('drop', event => {
+    event.preventDefault();
+    setFiles(event.dataTransfer.files);
+  });
+
+  return { setFiles, clear };
+}
+
+function previewStandalonePostImages(input) {
+  standaloneComposerManager?.setFiles(input.files);
+}
+
+function removeStandalonePostImages() {
+  standaloneComposerManager?.clear();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  standaloneComposerManager = createPhotoComposerManager({
+    inputId: 'standaloneImagesInput',
+    previewId: 'standalonePostPreview',
+    dropZoneId: 'standaloneDropZone',
+    statusId: 'standaloneComposerStatus'
+  });
+
+  document.querySelector('.post-composer-card')?.addEventListener('submit', function() {
+    const button = document.getElementById('standalonePublishBtn');
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Publishing...';
+    }
+  });
+});
+</script>
+{% endblock %}

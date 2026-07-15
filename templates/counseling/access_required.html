@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Access Required - Unfold{% endblock %}
+
+{% block content %}
+<div class="access-shell">
+  <section class="access-card">
+    <span class="access-icon"><i class="fa-solid fa-lock"></i></span>
+    <span class="empty-eyebrow">Protected workspace</span>
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <div class="access-actions">
+      <a href="{% url primary_url %}" class="profile-action primary">{{ primary_label }}</a>
+      <a href="{% url secondary_url %}" class="profile-action">{{ secondary_label }}</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

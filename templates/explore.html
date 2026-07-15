@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% block title %}Explore - Unfold{% endblock %}
+
+{% block extra_head %}
+<style>
+  .explore-page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 22px 20px 72px;
+  }
+
+  .explore-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+    gap: 26px;
+    align-items: end;
+    padding: 34px 0 28px;
+    border-bottom: 1px solid var(--line, #e7dedb);
+    margin-bottom: 24px;
+  }
+
+  .explore-hero h1 {
+    font-size: clamp(2.25rem, 6vw, 4.75rem);
+    line-height: 0.98;
+    letter-spacing: 0;
+    margin: 0 0 14px;
+    max-width: 780px;
+  }
+
+  .explore-hero p {
+    max-width: 640px;
+    color: #675d60;
+    margin: 0;
+  }
+
+  .explore-search {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e6cbd0;
+    background: #fff;
+    padding: 10px 10px 10px 14px;
+  }
+
+  .explore-search input {
+    border: 0;
+    outline: 0;
+    min-height: 36px;
+    background: transparent;
+  }
+
+  .explore-search button,
+  .explore-link-btn {
+    border: 1px solid #171113;
+    background: #171113;
+    color: #fff;
+    padding: 9px 14px;
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .explore-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .explore-stat {
+    background: #fff;
+    border: 1px solid #ead1d6;
+    padding: 16px;
+  }
+
+  .explore-stat strong {
+    display: block;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .explore-stat span {
+    color: #75696c;
+    font-size: 0.85rem;
+  }
+
+  .explore-section,
+  .explore-panel {
+    background: #fff;
+    border: 1px solid var(--line, #e7dedb);
+    padding: 18px;
+  }
+
+  .explore-section {
+    margin-bottom: 24px;
+  }
+
+  .section-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .section-heading-row h2 {
+    margin: 0;
+    font-size: 1.08rem;
+  }
+
+  .section-heading-row a {
+    color: #171113;
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .explore-photo-grid {
+    display: grid;
+    grid-template-columns: 1.3fr repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 180px;
+    gap: 4px;
+  }
+
+  .explore-photo-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: #f6efed;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .explore-photo-card:first-child {
+    grid-row: span 2;
+  }
+
+  .explore-photo-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.24s ease;
+  }
+
+  .explore-photo-card:hover img {
+    transform: scale(1.04);
+  }
+
+  .explore-photo-text {
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 16px;
+    font-weight: 850;
+    background: linear-gradient(135deg, #fff8f8, #f6dfda);
+  }
+
+  .explore-photo-meta {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    color: #fff;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.62));
+    font-weight: 850;
+  }
+
+  .explore-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .explore-row-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .explore-person,
+  .explore-story-row,
+  .explore-group,
+  .explore-counselor,
+  .explore-post-row {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid #f0d9dd;
+    background: #fffdfa;
+    padding: 12px;
+  }
+
+  .explore-group {
+    grid-template-columns: 74px minmax(0, 1fr) auto;
+  }
+
+  .explore-avatar,
+  .explore-thumb {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #f7e6ea;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    font-weight: 900;
+  }
+
+  .explore-thumb {
+    width: 74px;
+    height: 58px;
+    border-radius: 0;
+  }
+
+  .explore-avatar img,
+  .explore-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .explore-panel strong {
+    display: block;
+    color: #171113;
+  }
+
+  .explore-panel small {
+    color: #75696c;
+  }
+
+  .explore-side-label {
+    color: #9f405d;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .explore-empty {
+    border: 1px dashed #e6cbd0;
+    background: #fffdfa;
+    color: #75696c;
+    padding: 24px;
+    text-align: center;
+  }
+
+  @media (max-width: 940px) {
+    .explore-hero,
+    .explore-columns {
+      grid-template-columns: 1fr;
+    }
+
+    .explore-photo-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: 160px;
+    }
+
+    .explore-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .explore-page {
+      padding: 12px 12px 48px;
+    }
+
+    .explore-search {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .explore-search button {
+      grid-column: 1 / -1;
+    }
+
+    .explore-photo-grid,
+    .explore-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .explore-photo-card:first-child {
+      grid-row: span 1;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="explore-page">
+  <section class="explore-hero">
+    <div>
+      <span class="section-kicker">Explore</span>
+      <h1>Find posts, stories, people, and care.</h1>
+      <p>Search posts, anonymous stories, active communities, members, and verified counselors.</p>
+    </div>
+    <form method="get" action="{% url 'explore' %}" class="explore-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="search" name="q" value="{{ query }}" placeholder="Search posts, people, groups, counselors">
+      <button type="submit">Search</button>
+    </form>
+  </section>
+
+  <section class="explore-stats" aria-label="Explore stats">
+    <div class="explore-stat"><strong>{{ posts_count }}</strong><span>matching posts</span></div>
+    <div class="explore-stat"><strong>{{ people_count }}</strong><span>people</span></div>
+    <div class="explore-stat"><strong>{{ groups_count }}</strong><span>communities</span></div>
+    <div class="explore-stat"><strong>{{ counselors_count }}</strong><span>verified counselors</span></div>
+  </section>
+
+  <section class="explore-section">
+    <div class="section-heading-row">
+      <h2>Photo wall</h2>
+      <a href="{% url 'stories:post_create' %}">Create post</a>
+    </div>
+    {% if photo_posts %}
+      <div class="explore-photo-grid">
+        {% for post in photo_posts %}
+          <a class="explore-photo-card" href="{% url 'stories:post_detail' post.id %}">
+            {% with first_image=post.carousel_images.first %}
+              {% if first_image %}
+                <img src="{{ first_image.image.url }}" alt="Post image">
+              {% elif post.image %}
+                <img src="{{ post.image.url }}" alt="Post image">
+              {% else %}
+                <div class="explore-photo-text">{{ post.content|truncatewords:18 }}</div>
+              {% endif %}
+            {% endwith %}
+            <div class="explore-photo-meta">
+              <span>{% if post.is_anonymous %}{{ post.pseudonym|default:"Anonymous" }}{% else %}@{{ post.author.username }}{% endif %}</span>
+              <span><i class="fa-solid fa-heart"></i> {{ post.likes_total }} &nbsp; <i class="fa-regular fa-comment"></i> {{ post.comments_total }}</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="explore-empty">No photo posts yet. Add a post with photos to fill this wall.</div>
+    {% endif %}
+  </section>
+
+  <div class="explore-columns">
+    <section class="explore-panel">
+      <div class="section-heading-row">
+        <h2>Trending posts</h2>
+        <a href="{% url 'home' %}">Open feed</a>
+      </div>
+      <div class="explore-row-list">
+        {% for post in posts %}
+          <a class="explore-post-row" href="{% url 'stories:post_detail' post.id %}">
+            <span class="explore-avatar">{% if post.is_anonymous %}A{% else %}{{ post.author.username|first|upper }}{% endif %}</span>
+            <div>
+              <strong>{% if post.is_anonymous %}{{ post.pseudonym|default:"Anonymous" }}{% else %}@{{ post.author.username }}{% endif %}</strong>
+              <small>{{ post.content|default:"Photo post"|truncatewords:16 }}</small>
+            </div>
+            <span class="explore-side-label">{{ post.likes_total }} likes</span>
+          </a>
+        {% empty %}
+          <div class="explore-empty">No posts found.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="explore-panel">
+      <div class="section-heading-row">
+        <h2>Suggested people</h2>
+      </div>
+      <div class="explore-row-list">
+        {% for person in people %}
+          <div class="explore-person">
+            <span class="explore-avatar">
+              {% if person.profile and person.profile.image %}
+                <img src="{{ person.profile.image.url }}" alt="{{ person.username }}">
+              {% else %}
+                {{ person.username|first|upper }}
+              {% endif %}
+            </span>
+            <div>
+              <strong>{{ person.get_full_name|default:person.username }}</strong>
+              <small>{{ person.profile.bio|default:"Unfold member"|truncatechars:72 }}</small>
+            </div>
+            <span class="explore-side-label">member</span>
+          </div>
+        {% empty %}
+          <div class="explore-empty">No people found.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="explore-columns">
+    <section class="explore-panel">
+      <div class="section-heading-row">
+        <h2>Active stories</h2>
+        <a href="{% url 'stories:story_create' %}">Add story</a>
+      </div>
+      <div class="explore-row-list">
+        {% for story in stories %}
+          <a class="explore-story-row" href="{% url 'stories:story_detail' story.id %}">
+            <span class="explore-avatar">{{ story.display_initial }}</span>
+            <div>
+              <strong>{{ story.display_name }}</strong>
+              <small>{% if story.is_anonymous %}Anonymous story{% else %}{{ story.created_at|timesince }} ago{% endif %}</small>
+            </div>
+            <span class="explore-side-label">story</span>
+          </a>
+        {% empty %}
+          <div class="explore-empty">No active stories.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="explore-panel">
+      <div class="section-heading-row">
+        <h2>Active groups</h2>
+        <a href="{% url 'community:list' %}">View all</a>
+      </div>
+      <div class="explore-row-list">
+        {% for group in groups %}
+          <a class="explore-group" href="{% url 'community:group_detail' group.id %}">
+            <span class="explore-thumb">
+              {% if group.cover_image %}
+                <img src="{{ group.cover_image.url }}" alt="{{ group.name }}">
+              {% else %}
+                {{ group.name|first|upper }}
+              {% endif %}
+            </span>
+            <div>
+              <strong>{{ group.name }}</strong>
+              <small>{{ group.members_total }} members &middot; {{ group.discussions_total }} discussions</small>
+            </div>
+            <span class="explore-side-label">circle</span>
+          </a>
+        {% empty %}
+          <div class="explore-empty">No groups found.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <section class="explore-section">
+    <div class="section-heading-row">
+      <h2>Verified care</h2>
+      <a href="{% url 'counseling:list' %}">Book session</a>
+    </div>
+    <div class="explore-row-list">
+      {% for counselor in counselors %}
+        <a class="explore-counselor" href="{% url 'counseling:list' %}">
+          <span class="explore-avatar">
+            {% if counselor.photo %}
+              <img src="{{ counselor.photo.url }}" alt="{{ counselor.full_name }}">
+            {% else %}
+              {{ counselor.full_name|first }}
+            {% endif %}
+          </span>
+          <div>
+            <strong>{{ counselor.full_name }}</strong>
+            <small>{{ counselor.specialization|default:"General support" }} &middot; {{ counselor.years_experience }} years &middot; {{ counselor.rating|default:"4.8" }} rating</small>
+          </div>
+          <span class="explore-side-label">verified</span>
+        </a>
+      {% empty %}
+        <div class="explore-empty">No counselors found.</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

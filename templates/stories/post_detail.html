@@ -1,0 +1,157 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Post - Unfold{% endblock %}
+
+{% block content %}
+<div class="detail-shell">
+  <a class="back-link" href="{% url 'home' %}"><i class="fa-solid fa-arrow-left"></i> Feed</a>
+
+  <article class="detail-card" id="post-{{ post.id }}">
+    <section class="detail-media">
+      {% with images=post.carousel_images.all %}
+      {% if images %}
+        <div class="post-carousel detail-carousel" data-carousel>
+          <div class="post-carousel-track">
+            {% for item in images %}
+              <img src="{{ item.image.url }}" alt="Post image {{ forloop.counter }}" class="post-image carousel-slide {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}">
+            {% endfor %}
+          </div>
+          {% if images|length > 1 %}
+            <button type="button" class="carousel-nav prev" data-carousel-prev aria-label="Previous photo"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="carousel-nav next" data-carousel-next aria-label="Next photo"><i class="fa-solid fa-chevron-right"></i></button>
+            <span class="carousel-count"><span data-carousel-index>1</span>/{{ images|length }}</span>
+            <div class="carousel-dots">
+              {% for item in images %}
+                <button type="button" class="carousel-dot {% if forloop.first %}active{% endif %}" data-carousel-dot="{{ forloop.counter0 }}" aria-label="Go to photo {{ forloop.counter }}"></button>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% elif post.image %}
+        <img src="{{ post.image.url }}" alt="Post image">
+      {% else %}
+        <div class="detail-text-panel">{{ post.content|default:"No text content." }}</div>
+      {% endif %}
+      {% endwith %}
+    </section>
+
+    <section class="detail-content">
+      <div class="post-header">
+        {% if post.is_anonymous %}
+          <div class="post-avatar avatar-initial">{{ post.pseudonym|default:"A"|first|upper }}</div>
+        {% elif post.author.profile and post.author.profile.image %}
+          <img src="{{ post.author.profile.image.url }}" alt="{{ post.author.username }}" class="post-avatar">
+        {% else %}
+          <div class="post-avatar avatar-initial">{{ post.author.username|first|upper }}</div>
+        {% endif %}
+        <div class="post-user-info">
+          <div class="post-username">
+            {% if post.is_anonymous %}{{ post.pseudonym|default:"Anonymous" }}{% else %}{{ post.author.username }}{% endif %}
+          </div>
+          <div class="post-time">{{ post.created_at|timesince }} ago</div>
+        </div>
+      </div>
+
+      {% if post.image and post.content %}
+        <p class="detail-caption">{{ post.content }}</p>
+      {% elif post.carousel_images.all and post.content %}
+        <p class="detail-caption">{{ post.content }}</p>
+      {% endif %}
+
+      <div class="detail-actions">
+        <button class="post-action like-btn {% if liked %}liked{% endif %}" data-post-id="{{ post.id }}" data-action="like" aria-label="Like post">
+          <i class="fa-{% if liked %}solid{% else %}regular{% endif %} fa-heart"></i>
+        </button>
+        <button class="post-action save {% if saved %}saved{% endif %}" data-post-id="{{ post.id }}" data-action="save" aria-label="Save post">
+          <i class="fa-{% if saved %}solid{% else %}regular{% endif %} fa-bookmark"></i>
+        </button>
+        <span><strong id="like-count-{{ post.id }}">{{ post.like_set.count }}</strong> likes</span>
+      </div>
+
+      <div class="detail-comments">
+        <h2>Comments</h2>
+        {% for comment in comments %}
+          <div class="detail-comment">
+            <strong>{{ comment.user.username }}</strong>
+            <span>{{ comment.text }}</span>
+          </div>
+        {% empty %}
+          <p class="detail-muted">No comments yet. Start the conversation.</p>
+        {% endfor %}
+      </div>
+
+      {% if post.allow_comments and user.is_authenticated %}
+      <form class="detail-comment-form" method="post" action="{% url 'stories:comment_create' post.id %}">
+        {% csrf_token %}
+        <input type="text" name="text" placeholder="Add a thoughtful comment..." required>
+        <button type="submit">Post</button>
+      </form>
+      {% endif %}
+    </section>
+  </article>
+</div>
+
+<script>
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function togglePostAction(postId, endpoint, button, activeClass, solidClass, regularClass) {
+  fetch(endpoint + postId + '/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest'}
+  })
+  .then(response => response.json())
+  .then(data => {
+    const active = data.liked ?? data.saved;
+    button.classList.toggle(activeClass, active);
+    const icon = button.querySelector('i');
+    if (icon) icon.className = active ? solidClass : regularClass;
+    if (data.likes_count !== undefined) {
+      document.getElementById('like-count-' + postId).textContent = data.likes_count;
+    }
+  });
+}
+
+document.addEventListener('click', function(event) {
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  const postId = button.dataset.postId;
+  if (button.dataset.action === 'like') {
+    togglePostAction(postId, '/stories/like/', button, 'liked', 'fa-solid fa-heart', 'fa-regular fa-heart');
+  }
+  if (button.dataset.action === 'save') {
+    togglePostAction(postId, '/stories/save/', button, 'saved', 'fa-solid fa-bookmark', 'fa-regular fa-bookmark');
+  }
+});
+
+document.querySelectorAll('[data-carousel]').forEach(carousel => {
+  let index = 0;
+  const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
+  const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
+  const count = carousel.querySelector('[data-carousel-index]');
+  function showSlide(nextIndex) {
+    if (!slides.length) return;
+    index = (nextIndex + slides.length) % slides.length;
+    slides.forEach((slide, slideIndex) => slide.classList.toggle('active', slideIndex === index));
+    dots.forEach((dot, dotIndex) => dot.classList.toggle('active', dotIndex === index));
+    if (count) count.textContent = String(index + 1);
+  }
+  carousel.querySelector('[data-carousel-prev]')?.addEventListener('click', () => showSlide(index - 1));
+  carousel.querySelector('[data-carousel-next]')?.addEventListener('click', () => showSlide(index + 1));
+  dots.forEach(dot => dot.addEventListener('click', () => showSlide(parseInt(dot.dataset.carouselDot, 10))));
+});
+</script>
+{% endblock %}
+

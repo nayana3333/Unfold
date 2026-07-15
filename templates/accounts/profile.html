@@ -1,0 +1,895 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile - Unfold{% endblock %}
+
+{% block extra_head %}
+<style>
+  .profile-page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 20px 72px;
+  }
+
+  .profile-cover {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr) minmax(220px, 280px);
+    gap: 22px;
+    align-items: center;
+    padding: 30px;
+    margin-bottom: 22px;
+    border: 1px solid #f5cbd4;
+    border-radius: 28px;
+    background: linear-gradient(135deg, #ff7087 0%, #f79caf 100%);
+    color: #fff;
+    box-shadow: 0 22px 44px rgba(126, 45, 67, 0.14);
+  }
+
+  .profile-avatar-wrap {
+    width: 124px;
+    height: 124px;
+    border-radius: 50%;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .profile-avatar,
+  .profile-avatar-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #fff;
+    background: #fff7f8;
+  }
+
+  .profile-avatar-fallback {
+    display: grid;
+    place-items: center;
+    color: #9d4259;
+    font-size: 2.65rem;
+    font-weight: 900;
+  }
+
+  .profile-headline {
+    min-width: 0;
+  }
+
+  .profile-topline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .profile-username {
+    font-size: clamp(1.55rem, 3vw, 2.25rem);
+    line-height: 1;
+    margin: 0;
+    letter-spacing: 0;
+    color: #fff;
+  }
+
+  .profile-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #ead1d6;
+    background: #fff;
+    color: #8d3f55;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .profile-chip.primary {
+    background: #fff;
+    border-color: #fff;
+    color: #9d4259;
+    box-shadow: 0 10px 24px rgba(72, 24, 38, 0.12);
+  }
+
+  .profile-cover .profile-chip,
+  .profile-cover .profile-chip *,
+  .profile-cover .profile-chip.primary,
+  .profile-cover .profile-chip.primary * {
+    color: #9d4259 !important;
+  }
+
+  .profile-cover .profile-username,
+  .profile-cover .profile-stats,
+  .profile-cover .profile-stats *,
+  .profile-cover .profile-bio,
+  .profile-cover .profile-bio * {
+    color: #fff !important;
+  }
+
+  .profile-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 0 0 14px;
+    padding: 0;
+    list-style: none;
+    color: #fff;
+  }
+
+  .profile-stats strong {
+    margin-right: 5px;
+    font-size: 1.08rem;
+  }
+
+  .profile-bio {
+    color: rgba(255, 255, 255, 0.94);
+    max-width: 620px;
+  }
+
+  .profile-bio p {
+    margin: 5px 0;
+  }
+
+  .profile-cover .profile-muted {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .profile-progress-card .profile-muted {
+    color: #695d61;
+  }
+
+  .profile-progress-card {
+    width: min(100%, 260px);
+    background: rgba(255, 255, 255, 0.96);
+    color: #17263d;
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    border-radius: 20px;
+    padding: 16px;
+  }
+
+  .profile-progress-card strong {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .profile-progress-track {
+    height: 8px;
+    background: #f7e7ea;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+
+  .profile-progress-fill {
+    height: 100%;
+    background: #17263d;
+  }
+
+  .profile-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 24px;
+    align-items: start;
+    margin-top: 0;
+  }
+
+  .profile-composer,
+  .profile-panel,
+  .profile-side-card,
+  .profile-modal-panel {
+    background: #fff;
+    border: 1px solid var(--line, #e7dedb);
+    border-radius: 20px;
+    box-shadow: 0 14px 30px rgba(126, 45, 67, 0.08);
+  }
+
+  .profile-composer {
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+
+  .profile-composer h2,
+  .profile-side-card h2,
+  .profile-panel h2 {
+    font-size: 1rem;
+    margin: 0 0 14px;
+  }
+
+  .profile-form label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.86rem;
+    font-weight: 800;
+  }
+
+  .profile-form input,
+  .profile-form textarea {
+    width: 100%;
+    border: 1px solid #e6cbd0;
+    background: #fffdfa;
+    padding: 11px 12px;
+    margin-bottom: 13px;
+    border-radius: 0;
+  }
+
+  .profile-form textarea {
+    min-height: 96px;
+    resize: vertical;
+  }
+
+  .composer-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .composer-options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #4f4548;
+  }
+
+  .composer-options input {
+    width: auto;
+    margin: 0;
+  }
+
+  .profile-action {
+    border: 1px solid #171113;
+    background: #171113;
+    color: #fff;
+    padding: 10px 16px;
+    font-weight: 850;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .profile-action.secondary {
+    background: #fff;
+    color: #171113;
+    border-color: #e3ccd1;
+  }
+
+  .profile-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    border-bottom: 1px solid var(--line, #e7dedb);
+    margin-bottom: 18px;
+  }
+
+  .profile-tab {
+    border: 0;
+    background: transparent;
+    color: #817276;
+    padding: 15px 4px;
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+
+  .profile-tab.active {
+    color: #171113;
+    border-bottom-color: #171113;
+  }
+
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  .profile-media-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .profile-tile {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #f7f1ef;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .profile-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.24s ease;
+  }
+
+  .profile-tile:hover img {
+    transform: scale(1.04);
+  }
+
+  .profile-tile-text {
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 16px;
+    color: #171113;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff8f8, #f7e4df);
+  }
+
+  .tile-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.36);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    font-weight: 900;
+  }
+
+  .profile-tile:hover .tile-overlay {
+    opacity: 1;
+  }
+
+  .tile-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #fff;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .profile-story-grid,
+  .profile-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .profile-story-card,
+  .profile-list-item {
+    border: 1px solid #ead1d6;
+    background: #fffdfa;
+    color: inherit;
+    text-decoration: none;
+    padding: 14px;
+  }
+
+  .profile-story-card {
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+  }
+
+  .profile-story-thumb {
+    width: 82px;
+    height: 82px;
+    background: #f7e6ea;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    font-weight: 900;
+  }
+
+  .profile-story-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profile-list-item {
+    display: grid;
+    gap: 8px;
+  }
+
+  .profile-list-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .profile-muted {
+    color: #766b6e;
+    font-size: 0.9rem;
+  }
+
+  .profile-empty {
+    border: 1px dashed #e6cbd0;
+    background: #fffdfa;
+    padding: 34px;
+    text-align: center;
+    color: #706568;
+  }
+
+  .profile-side-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .profile-metric-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .profile-metric {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #f0dcdf;
+    padding-bottom: 10px;
+  }
+
+  .profile-metric:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .profile-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(23, 17, 19, 0.5);
+  }
+
+  .profile-modal.open {
+    display: flex;
+  }
+
+  .profile-modal-panel {
+    width: min(100%, 560px);
+    padding: 20px;
+    max-height: 88vh;
+    overflow: auto;
+  }
+
+  .profile-modal-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .profile-close {
+    border: 0;
+    background: transparent;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  @media (max-width: 980px) {
+    .profile-cover,
+    .profile-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-progress-card {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .profile-page {
+      padding: 12px 12px 48px;
+    }
+
+    .profile-cover {
+      text-align: center;
+      justify-items: center;
+      gap: 18px;
+      padding: 24px 18px;
+    }
+
+    .profile-avatar-wrap {
+      width: 124px;
+      height: 124px;
+    }
+
+    .profile-topline,
+    .profile-stats {
+      justify-content: center;
+    }
+
+    .profile-topline {
+      width: 100%;
+      gap: 10px;
+    }
+
+    .profile-chip {
+      min-width: 136px;
+      justify-content: center;
+    }
+
+    .profile-media-grid {
+      gap: 3px;
+    }
+
+    .profile-tabs {
+      overflow-x: auto;
+      justify-content: flex-start;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <section class="profile-cover">
+    <div class="profile-avatar-wrap">
+      {% if user.profile and user.profile.image %}
+        <img class="profile-avatar" src="{{ user.profile.image.url }}" alt="{{ user.username }}">
+      {% else %}
+        <div class="profile-avatar-fallback">{{ user.username|first|upper }}</div>
+      {% endif %}
+    </div>
+
+    <div class="profile-headline">
+      <div class="profile-topline">
+        <h1 class="profile-username">{{ user.get_full_name|default:user.username }}</h1>
+        <button class="profile-chip" type="button" data-open-profile-modal><i class="fa-regular fa-pen-to-square"></i> Edit profile</button>
+        <a class="profile-chip primary" href="{% url 'stories:post_create' %}"><i class="fa-regular fa-square-plus"></i> New post</a>
+      </div>
+      <ul class="profile-stats" aria-label="Profile stats">
+        <li><strong>{{ my_posts|length }}</strong>posts</li>
+        <li><strong>{{ my_stories|length }}</strong>stories</li>
+        <li><strong>{{ my_memberships|length }}</strong>groups</li>
+        <li><strong>{{ post_likes_received }}</strong>likes received</li>
+      </ul>
+      <div class="profile-bio">
+        <p><strong>@{{ user.username }}</strong> · {{ user.email|default:"No email added" }}</p>
+        <p>{{ user.profile.bio|default:user.profile.about|default:"No bio yet. Add a short line about your interests, goals, or support spaces." }}</p>
+        {% if user.profile and user.profile.interests %}
+          <p class="profile-muted">{{ user.profile.interests }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="profile-progress-card">
+      <strong>Profile strength</strong>
+      <span class="profile-muted">{{ profile_completion }}% complete</span>
+      <div class="profile-progress-track" aria-hidden="true">
+        <div class="profile-progress-fill" style="width: {{ profile_completion }}%;"></div>
+      </div>
+      <span class="profile-muted">Add a photo, bio, and interests so your profile feels complete.</span>
+    </aside>
+  </section>
+
+  <div class="profile-layout">
+    <main>
+      <section class="profile-composer">
+        <h2>Create something new</h2>
+        <form class="profile-form" method="post" action="{% url 'stories:post_create' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <label for="quick-content">Caption</label>
+          <textarea id="quick-content" name="content" placeholder="Share a thought, update, or support note..."></textarea>
+
+          <label for="quick-images">Photos</label>
+          <input id="quick-images" type="file" name="images" accept="image/*" multiple>
+
+          <label for="quick-file">Attachment</label>
+          <input id="quick-file" type="file" name="file">
+
+          <div class="composer-options">
+            <label for="anon"><input type="checkbox" id="anon" name="is_anonymous" onchange="toggleProfilePseudonymField()"> Post anonymously</label>
+            <label for="allowc"><input type="checkbox" id="allowc" name="allow_comments" checked> Allow comments</label>
+          </div>
+
+          <div id="profilePseudonymGroup" style="display:none;">
+            <label for="pseudonym">Anonymous display name</label>
+            <input type="text" id="pseudonym" name="pseudonym" placeholder="Leave blank for Anonymous" maxlength="80">
+          </div>
+
+          <button type="submit" class="profile-action"><i class="fa-regular fa-paper-plane"></i> Publish</button>
+        </form>
+      </section>
+
+      <section class="profile-panel">
+        <div class="profile-tabs">
+          <button class="profile-tab active" data-tab="posts">Posts</button>
+          <button class="profile-tab" data-tab="stories">Stories</button>
+          <button class="profile-tab" data-tab="saved">Saved</button>
+          <button class="profile-tab" data-tab="activity">Activity</button>
+          <button class="profile-tab" data-tab="groups">Groups</button>
+        </div>
+
+        <div id="tab-posts" class="tab-panel active">
+          {% if my_posts %}
+            <div class="profile-media-grid">
+              {% for post in my_posts %}
+                <a class="profile-tile" href="{% url 'stories:post_detail' post.id %}">
+                  {% with images=post.carousel_images.all %}
+                    {% if images %}
+                      {% for item in images %}
+                        {% if forloop.first %}<img src="{{ item.image.url }}" alt="Post image">{% endif %}
+                      {% endfor %}
+                      {% if images|length > 1 %}<span class="tile-badge"><i class="fa-regular fa-images"></i></span>{% endif %}
+                    {% elif post.image %}
+                      <img src="{{ post.image.url }}" alt="Post image">
+                    {% else %}
+                      <div class="profile-tile-text">{{ post.content|default:"Untitled post"|truncatewords:18 }}</div>
+                    {% endif %}
+                  {% endwith %}
+                  <div class="tile-overlay">
+                    <span><i class="fa-solid fa-heart"></i> {{ post.like_set.count }}</span>
+                    <span><i class="fa-regular fa-comment"></i> {{ post.comment_set.count }}</span>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="profile-empty">
+              <strong>No posts yet.</strong>
+              <p>Publish your first photo, note, or anonymous post from the composer above.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <div id="tab-stories" class="tab-panel">
+          {% if my_stories %}
+            <div class="profile-story-grid">
+              {% for story in my_stories %}
+                <a class="profile-story-card" href="{% url 'stories:story_detail' story.id %}">
+                  <div class="profile-story-thumb">
+                    {% if story.story_type == 'image' and story.image %}
+                      <img src="{{ story.image.url }}" alt="Story image">
+                    {% elif story.story_type == 'video' %}
+                      <i class="fa-solid fa-play"></i>
+                    {% else %}
+                      {{ story.display_initial }}
+                    {% endif %}
+                  </div>
+                  <div>
+                    <strong>{{ story.display_name }}</strong>
+                    <div class="profile-muted">{% if story.is_anonymous %}Anonymous story{% else %}Visible account{% endif %} · {{ story.created_at|date:"M d, Y" }}</div>
+                    <p>{{ story.content|default:"Story update"|truncatewords:20 }}</p>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="profile-empty">
+              <strong>No stories yet.</strong>
+              <p>Stories can be visible or anonymous when you publish them.</p>
+              <a class="profile-action secondary" href="{% url 'stories:story_create' %}">Create story</a>
+            </div>
+          {% endif %}
+        </div>
+
+        <div id="tab-saved" class="tab-panel">
+          {% if saved_posts %}
+            <div class="profile-media-grid">
+              {% for saved in saved_posts %}
+                <a class="profile-tile" href="{% url 'stories:post_detail' saved.post.id %}">
+                  {% with images=saved.post.carousel_images.all %}
+                    {% if images %}
+                      {% for item in images %}
+                        {% if forloop.first %}<img src="{{ item.image.url }}" alt="Saved post image">{% endif %}
+                      {% endfor %}
+                    {% elif saved.post.image %}
+                      <img src="{{ saved.post.image.url }}" alt="Saved post image">
+                    {% else %}
+                      <div class="profile-tile-text">{{ saved.post.content|default:"Saved post"|truncatewords:18 }}</div>
+                    {% endif %}
+                  {% endwith %}
+                  <div class="tile-overlay">
+                    <span><i class="fa-regular fa-bookmark"></i> Saved</span>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="profile-empty">
+              <strong>No saved posts yet.</strong>
+              <p>Save posts from the home feed and they will appear here.</p>
+              <a class="profile-action secondary" href="{% url 'home' %}">Explore feed</a>
+            </div>
+          {% endif %}
+        </div>
+
+        <div id="tab-activity" class="tab-panel">
+          {% if my_comments %}
+            <div class="profile-list">
+              {% for comment in my_comments %}
+                <article class="profile-list-item">
+                  <div class="profile-list-top">
+                    <div>
+                      <strong>Commented on {{ comment.post.author.username }}'s post</strong>
+                      <div class="profile-muted">{{ comment.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <a class="profile-action secondary" href="{% url 'stories:post_detail' comment.post.id %}">Open</a>
+                  </div>
+                  <p>{{ comment.text }}</p>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="profile-empty">
+              <strong>No comment activity yet.</strong>
+              <p>Comment on posts from the feed to build your activity history.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <div id="tab-groups" class="tab-panel">
+          {% if my_memberships %}
+            <div class="profile-list">
+              {% for membership in my_memberships %}
+                <article class="profile-list-item">
+                  <div class="profile-list-top">
+                    <div>
+                      <strong>{{ membership.group.name }}</strong>
+                      <div class="profile-muted">Joined {{ membership.joined_at|date:"M d, Y" }}</div>
+                    </div>
+                    <a class="profile-action secondary" href="{% url 'community:group_detail' membership.group.pk %}">Open</a>
+                  </div>
+                  <p>{{ membership.group.description|truncatewords:28 }}</p>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="profile-empty">
+              <strong>No groups yet.</strong>
+              <p>Join a circle from Community and it will show up here.</p>
+              <a class="profile-action secondary" href="{% url 'community:list' %}">Browse groups</a>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+
+    <aside>
+      <section class="profile-side-card">
+        <h2>Account actions</h2>
+        <div class="profile-metric-list">
+          <a class="profile-chip" href="{% url 'stories:story_create' %}"><i class="fa-regular fa-circle-play"></i> New story</a>
+          <a class="profile-chip" href="{% url 'explore' %}"><i class="fa-solid fa-magnifying-glass"></i> Explore</a>
+          <a class="profile-chip" href="{% url 'counseling:list' %}"><i class="fa-solid fa-user-doctor"></i> Book session</a>
+          <a class="profile-chip" href="{% url 'community:list' %}"><i class="fa-solid fa-user-group"></i> Browse groups</a>
+        </div>
+      </section>
+
+      <section class="profile-side-card">
+        <h2>Insights</h2>
+        <div class="profile-metric-list">
+          <div class="profile-metric"><span>Saved posts</span><strong>{{ saved_posts_count }}</strong></div>
+          <div class="profile-metric"><span>Liked posts</span><strong>{{ liked_posts_count }}</strong></div>
+          <div class="profile-metric"><span>Comments received</span><strong>{{ post_comments_received }}</strong></div>
+          <div class="profile-metric"><span>Joined</span><strong>{{ user.date_joined|date:"Y" }}</strong></div>
+        </div>
+      </section>
+
+      <section class="profile-side-card">
+        <h2>Top posts</h2>
+        {% if top_posts %}
+          <div class="profile-list">
+            {% for post in top_posts %}
+              <a class="profile-list-item" href="{% url 'stories:post_detail' post.id %}">
+                <strong>{{ post.content|default:"Photo post"|truncatewords:10 }}</strong>
+                <span class="profile-muted">{{ post.likes_total }} likes · {{ post.comments_total }} comments</span>
+              </a>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="profile-muted">Your best-performing posts will appear after people engage.</p>
+        {% endif %}
+      </section>
+
+      <section class="profile-side-card">
+        <h2>Session</h2>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="profile-action secondary">Logout</button>
+        </form>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<div class="profile-modal" id="profileModal" aria-hidden="true">
+  <div class="profile-modal-panel" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="profile-modal-head">
+      <h2 id="profileModalTitle">Edit profile</h2>
+      <button class="profile-close" type="button" data-close-profile-modal aria-label="Close">&times;</button>
+    </div>
+    <form class="profile-form" method="post" action="{% url 'accounts:profile' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="display_name">Display name</label>
+      <input id="display_name" type="text" name="display_name" value="{{ user.get_full_name|default:user.username }}">
+
+      <label for="bio">Bio</label>
+      <textarea id="bio" name="bio" placeholder="A short profile bio...">{% if user.profile %}{{ user.profile.bio }}{% endif %}</textarea>
+
+      <label for="about">About</label>
+      <textarea id="about" name="about" placeholder="A little more about you...">{% if user.profile %}{{ user.profile.about }}{% endif %}</textarea>
+
+      <label for="interests">Interests</label>
+      <input id="interests" type="text" name="interests" placeholder="mindfulness, coding, career, books" value="{% if user.profile %}{{ user.profile.interests }}{% endif %}">
+
+      <label for="image">Profile photo</label>
+      <input id="image" type="file" name="image" accept="image/*">
+
+      <button type="submit" class="profile-action">Save profile</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.profile-tab');
+  const panels = {
+    posts: document.getElementById('tab-posts'),
+    stories: document.getElementById('tab-stories'),
+    saved: document.getElementById('tab-saved'),
+    activity: document.getElementById('tab-activity'),
+    groups: document.getElementById('tab-groups')
+  };
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tab = this.dataset.tab;
+      tabs.forEach(item => item.classList.remove('active'));
+      this.classList.add('active');
+      Object.values(panels).forEach(panel => panel && panel.classList.remove('active'));
+      if (panels[tab]) panels[tab].classList.add('active');
+    });
+  });
+
+  const modal = document.getElementById('profileModal');
+  document.querySelectorAll('[data-open-profile-modal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    });
+  });
+  document.querySelectorAll('[data-close-profile-modal]').forEach(btn => {
+    btn.addEventListener('click', closeModal);
+  });
+  modal.addEventListener('click', event => {
+    if (event.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+
+  function closeModal() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+})();
+
+function toggleProfilePseudonymField() {
+  const anonCheckbox = document.getElementById('anon');
+  const pseudonymGroup = document.getElementById('profilePseudonymGroup');
+  const pseudonymInput = document.getElementById('pseudonym');
+  if (anonCheckbox.checked) {
+    pseudonymGroup.style.display = 'block';
+  } else {
+    pseudonymGroup.style.display = 'none';
+    if (pseudonymInput) pseudonymInput.value = '';
+  }
+}
+</script>
+{% endblock %}

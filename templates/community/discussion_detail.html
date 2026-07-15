@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ discussion.title|default:"Discussion" }} - {{ discussion.group.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .discussion-detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .discussion-header-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .discussion-header-card h1 {
+    margin: 0 0 12px;
+    font-size: 28px;
+    color: #333;
+  }
+  
+  .discussion-meta {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .discussion-content {
+    color: #333;
+    line-height: 1.8;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .discussion-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .like-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    transition: color 0.2s ease;
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+  
+  .like-btn:hover {
+    background: #FFF5F9;
+    color: #F4A6B5;
+  }
+  
+  .like-btn.liked {
+    color: #F4A6B5;
+    background: #FFF5F9;
+  }
+  
+  .comment-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .comment-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .comment-content {
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  
+  .comment-meta {
+    color: #666;
+    font-size: 12px;
+  }
+  
+  .comment-form-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .form-control {
+    border: 2px solid rgba(244, 166, 181, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  .form-control:focus {
+    border-color: #F4A6B5;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+  }
+  
+  .submit-btn {
+    background: #F4A6B5;
+    border: none;
+    color: white;
+    border-radius: 20px;
+    padding: 10px 24px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .submit-btn:hover {
+    background: #F88379;
+  }
+  
+  .back-link {
+    color: #F4A6B5;
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  
+  .back-link:hover {
+    color: #F88379;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="discussion-detail-container">
+  <a href="{% url 'community:group_detail' discussion.group.pk %}" class="back-link">Back to {{ discussion.group.name }}</a>
+  
+  <div class="discussion-header-card">
+    <div class="discussion-meta">
+      <strong>{{ discussion.author.username }}</strong> - {{ discussion.created_at|timesince }} ago
+      <span class="text-muted">- in <a href="{% url 'community:group_detail' discussion.group.pk %}" style="color: #F4A6B5;">{{ discussion.group.name }}</a></span>
+      {% if discussion.is_pinned %}<span class="badge" style="margin-left:8px;">Pinned</span>{% endif %}
+      {% if discussion.is_closed %}<span class="badge" style="margin-left:8px;">Closed</span>{% endif %}
+    </div>
+    {% if discussion.title %}
+    <h1>{{ discussion.title }}</h1>
+    {% endif %}
+    <div class="discussion-content">{{ discussion.content|linebreaks }}</div>
+    <div class="discussion-actions">
+      {% if is_member %}
+      <button class="like-btn{% if is_liked %} liked{% endif %}" id="like-btn" data-discussion-id="{{ discussion.pk }}" data-liked="{% if is_liked %}true{% else %}false{% endif %}">
+        <span>Like</span>
+        <span id="like-count">{{ discussion.like_count }}</span> <span id="like-text">likes</span>
+      </button>
+      {% else %}
+      <span>{{ discussion.like_count }} likes</span>
+      {% endif %}
+      <span>{{ discussion.comment_count }} comments</span>
+    </div>
+    {% if can_manage %}
+    <div class="discussion-actions" style="margin-top:12px;">
+      <form method="post" action="{% url 'community:update_discussion' discussion.pk 'pin' %}">{% csrf_token %}<button class="submit-btn" type="submit" {% if discussion.is_pinned %}disabled{% endif %}>Pin</button></form>
+      <form method="post" action="{% url 'community:update_discussion' discussion.pk 'unpin' %}">{% csrf_token %}<button class="submit-btn" type="submit" {% if not discussion.is_pinned %}disabled{% endif %}>Unpin</button></form>
+      <form method="post" action="{% url 'community:update_discussion' discussion.pk 'close' %}">{% csrf_token %}<button class="submit-btn" type="submit" {% if discussion.is_closed %}disabled{% endif %}>Close</button></form>
+      <form method="post" action="{% url 'community:update_discussion' discussion.pk 'reopen' %}">{% csrf_token %}<button class="submit-btn" type="submit" {% if not discussion.is_closed %}disabled{% endif %}>Reopen</button></form>
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if comment_form %}
+  <div class="comment-form-card">
+    <h5 style="margin: 0 0 16px; color: #333;">Add a Comment</h5>
+    <form method="post" action="{% url 'community:create_comment' discussion.pk %}">
+      {% csrf_token %}
+      {{ comment_form.content }}
+      <button type="submit" class="submit-btn">Post Comment</button>
+    </form>
+  </div>
+  {% elif is_member and discussion.is_closed %}
+  <div class="comment-form-card">
+    <p class="text-muted" style="margin:0;">This discussion is closed for new comments.</p>
+  </div>
+  {% endif %}
+  
+  <h4 style="margin-bottom: 16px; color: #333;">Comments ({{ discussion.comment_count }})</h4>
+  
+  {% if comments %}
+    {% for comment in comments %}
+    <div class="comment-card">
+      <div class="comment-header">
+        {% if comment.author.profile and comment.author.profile.image %}
+          <img class="comment-avatar" src="{{ comment.author.profile.image.url }}" alt="{{ comment.author.username }}" />
+        {% else %}
+          <span class="comment-avatar avatar-initial">{{ comment.author.username|first|upper }}</span>
+        {% endif %}
+        <div>
+          <strong>{{ comment.author.username }}</strong>
+          <div class="comment-meta">{{ comment.created_at|timesince }} ago</div>
+        </div>
+      </div>
+      <div class="comment-content">{{ comment.content|linebreaks }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="comment-card text-center py-5">
+      <p class="text-muted">No comments yet. Be the first to comment!</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const likeBtn = document.getElementById('like-btn');
+  if (likeBtn) {
+    likeBtn.addEventListener('click', function() {
+      const discussionId = this.getAttribute('data-discussion-id');
+      toggleLike(discussionId);
+    });
+  }
+});
+
+function toggleLike(discussionId) {
+  const btn = document.getElementById('like-btn');
+  const countEl = document.getElementById('like-count');
+  
+  if (!btn || !discussionId) return;
+  
+  // Disable button during request
+  btn.disabled = true;
+  
+  fetch('/community/discussion/' + discussionId + '/like/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    credentials: 'same-origin'
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(data => {
+        throw new Error(data.error || 'Failed to like discussion');
+      });
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (btn) {
+      if (data.liked) {
+        btn.classList.add('liked');
+      } else {
+        btn.classList.remove('liked');
+      }
+      btn.disabled = false;
+    }
+    
+    if (countEl) {
+      countEl.textContent = data.like_count;
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    if (btn) btn.disabled = false;
+    alert(error.message || 'Failed to like discussion. Please try again.');
+  });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+{% endblock %}

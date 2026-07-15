@@ -1,0 +1,257 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}Register - Unfold{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .auth-container {
+    max-width: 450px;
+    margin: 60px auto;
+    padding: 0 20px;
+  }
+  
+  .auth-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    padding: 40px;
+  }
+  
+  .auth-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .auth-header h2 {
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+  
+  .auth-header p {
+    color: #666;
+    font-size: 14px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid rgba(244, 166, 181, 0.3);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: #F4A6B5;
+    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+  }
+  
+  .form-control::placeholder {
+    color: #999;
+  }
+  
+  .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+  }
+  
+  .errorlist li {
+    color: #dc3545;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  .auth-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+  }
+  
+  .auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 166, 181, 0.3);
+  }
+  
+  .auth-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .auth-footer p {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+  }
+  
+  .auth-footer a {
+    color: #F4A6B5;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .auth-footer a:hover {
+    color: #F88379;
+    text-decoration: underline;
+  }
+  
+  .helptext {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+    display: block;
+  }
+
+  
+  @media (max-width: 576px) {
+    .auth-container {
+      margin: 40px auto;
+    }
+    
+    .auth-card {
+      padding: 30px 24px;
+    }
+    
+    .auth-header h2 {
+      font-size: 24px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Join Unfold</h2>
+      <p>Create your account to connect and share</p>
+    </div>
+    
+    <form method="post">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="id_username" class="form-label">Username</label>
+        <input type="text" name="username" id="id_username" class="form-control" placeholder="Choose a username" required autofocus>
+        {% if form.username.errors %}
+          <ul class="errorlist">
+            {% for error in form.username.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if form.username.help_text %}
+          <span class="helptext">{{ form.username.help_text }}</span>
+        {% endif %}
+      </div>
+      
+      <div class="form-group">
+        <label for="id_email" class="form-label">Email</label>
+        <input type="email" name="email" id="id_email" class="form-control" placeholder="your.email@example.com" required>
+        {% if form.email.errors %}
+          <ul class="errorlist">
+            {% for error in form.email.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_role" class="form-label">I am registering as</label>
+        <select name="role" id="id_role" class="form-control" required>
+          {% for value, label in form.role.field.choices %}
+            <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        {% if form.role.errors %}
+          <ul class="errorlist">
+            {% for error in form.role.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <span class="helptext">Counselor accounts require admin verification before real sessions.</span>
+      </div>
+      
+      <div class="form-group">
+        <label for="id_password1" class="form-label">Password</label>
+        <input type="password" name="password1" id="id_password1" class="form-control" placeholder="Create a strong password" required>
+        {% if form.password1.errors %}
+          <ul class="errorlist">
+            {% for error in form.password1.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if form.password1.help_text %}
+          <span class="helptext">{{ form.password1.help_text }}</span>
+        {% endif %}
+      </div>
+      
+      <div class="form-group">
+        <label for="id_password2" class="form-label">Confirm Password</label>
+        <input type="password" name="password2" id="id_password2" class="form-control" placeholder="Confirm your password" required>
+        {% if form.password2.errors %}
+          <ul class="errorlist">
+            {% for error in form.password2.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if form.password2.help_text %}
+          <span class="helptext">{{ form.password2.help_text }}</span>
+        {% endif %}
+      </div>
+
+      {% if form.non_field_errors %}
+        <ul class="errorlist">
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      
+      <button type="submit" class="auth-btn">Create Account</button>
+    </form>
+    
+    <div class="auth-footer">
+      <p>Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

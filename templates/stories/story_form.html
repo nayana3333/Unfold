@@ -1,0 +1,102 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Story - Unfold{% endblock %}
+
+{% block content %}
+<div class="story-composer-shell">
+  <section class="story-composer-hero">
+    <div>
+      <div class="section-kicker">24 hour story</div>
+      <h1>Create a story</h1>
+      <p>Share a quick update, a photo, or a short video with your Unfold community.</p>
+    </div>
+  </section>
+
+  <section class="story-composer-card">
+    <form method="post" enctype="multipart/form-data" class="story-composer-form">
+      {% csrf_token %}
+
+      <label for="id_content">Story text</label>
+      {{ form.content }}
+
+      <div class="story-upload-grid">
+        <div>
+          <label for="id_image">Image</label>
+          {{ form.image }}
+          <div id="image-preview" class="story-preview"></div>
+        </div>
+        <div>
+          <label for="id_video">Video</label>
+          {{ form.video }}
+          <div id="video-preview" class="story-preview"></div>
+        </div>
+      </div>
+
+      <div class="story-note">
+        <i class="fa-solid fa-clock"></i>
+        <span>Your story stays visible for 24 hours.</span>
+      </div>
+
+      <div class="story-privacy-card">
+        <label class="modal-checkbox">
+          {{ form.is_anonymous }}
+          <span>Share without revealing my account</span>
+        </label>
+        <div id="storyPseudonymGroup" style="display:none;">
+          <label for="id_pseudonym">Anonymous display name</label>
+          {{ form.pseudonym }}
+        </div>
+      </div>
+
+      <div class="story-composer-actions">
+        <a href="{% url 'home' %}">Cancel</a>
+        <button type="submit">Share story</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function previewImage(input) {
+  const previewContainer = document.getElementById('image-preview');
+  const videoPreview = document.getElementById('video-preview');
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    previewContainer.innerHTML = '<img src="' + event.target.result + '" alt="Image preview">';
+    videoPreview.innerHTML = '';
+    document.getElementById('id_video').value = '';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function previewVideo(input) {
+  const previewContainer = document.getElementById('video-preview');
+  const imagePreview = document.getElementById('image-preview');
+  if (!input.files || !input.files[0]) return;
+  const url = URL.createObjectURL(input.files[0]);
+  previewContainer.innerHTML = '<video src="' + url + '" controls></video>';
+  imagePreview.innerHTML = '';
+  document.getElementById('id_image').value = '';
+}
+
+document.getElementById('id_image')?.addEventListener('change', function() { previewImage(this); });
+document.getElementById('id_video')?.addEventListener('change', function() { previewVideo(this); });
+document.getElementById('id_is_anonymous')?.addEventListener('change', function() {
+  const group = document.getElementById('storyPseudonymGroup');
+  const input = document.getElementById('id_pseudonym');
+  group.style.display = this.checked ? 'block' : 'none';
+  if (!this.checked && input) input.value = '';
+});
+if (document.getElementById('id_is_anonymous')?.checked) {
+  document.getElementById('storyPseudonymGroup').style.display = 'block';
+}
+{% if form.content %}
+document.getElementById('id_content')?.setAttribute('placeholder', 'What do you want to share today?');
+{% endif %}
+</script>
+{% endblock %}
+

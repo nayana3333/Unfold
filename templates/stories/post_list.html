@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Posts Feed{% endblock %}
+
+{% block content %}
+
+<!-- Stories bar at the very top -->
+{% include 'stories/active_stories.html' %}
+
+<!-- FEED starts here -->
+<div class="posts-list">
+  {% for post in posts %}
+  <div class="card mb-4" data-post-id="{{ post.id }}">
+    <div class="card-header d-flex align-items-center">
+      {% if not post.is_anonymous %}
+        <strong>{{ post.author.username }}</strong>
+      {% else %}
+        <strong>{{ post.pseudonym|default:"Anonymous" }}</strong>
+      {% endif %}
+      <span class="ms-auto small text-muted">{{ post.created_at|date:"M d, Y H:i" }}</span>
+    </div>
+    {% if post.image %}
+      <img src="{{ post.image.url }}" class="card-img-top" alt="Post image" />
+    {% endif %}
+    <div class="card-body">
+      <p class="card-text">{{ post.content }}</p>
+      <div class="d-flex align-items-center">
+        <form method="post" action="{% url 'stories:like_toggle' post.id %}" class="js-like-form">
+          {% csrf_token %}
+          <button class="btn btn-link p-0 me-3 {% if user.is_authenticated and post.id in liked_post_ids %}heart-liked{% endif %}"
+                  title="Like"
+                  style="font-size:1.2rem; text-decoration:none;"
+                  id="heart-{{ post.id }}">🫀</button>
+        </form>
+        <span class="me-3 text-dark fw-bold meta-item" id="likes-count-{{ post.id }}">{{ post.like_set.count }} likes</span>
+        {% if post.allow_comments %}
+          <a class="me-3 text-dark fw-bold meta-item" href="#comments-{{ post.id }}">💬 {{ post.comment_set.count }} comments</a>
+        {% else %}
+          <span class="text-muted me-3 fw-bold meta-item">💬 Comments off</span>
+        {% endif %}
+        <a class="me-3 text-dark fw-bold meta-item" href="{{ request.build_absolute_uri }}" onclick="navigator.clipboard.writeText(window.location.href); return false;" title="Share">📤 Share</a>
+        {% if user.is_staff or user.id == post.author_id %}
+          <form method="post" action="{% url 'stories:post_delete' post.id %}" class="ms-auto js-delete-form">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this post?')">Delete</button>
+          </form>
+        {% endif %}
+      </div>
+      <div id="comments-{{ post.id }}" class="mt-2">
+        <!-- Comments preview (first 2) -->
+        <div id="comments-list-{{ post.id }}">
+        {% for c in post.comment_set.all|slice:':2' %}
+          <div class="small text-muted">{{ c.user.username }}: {{ c.text }}</div>
+        {% empty %}
+          <div class="small text-muted" data-empty="true">No comments yet</div>
+        {% endfor %}
+        </div>
+        {% if post.allow_comments %}
+          <form method="post" action="{% url 'stories:comment_create' post.id %}" class="mt-2 d-flex js-comment-form">
+            {% csrf_token %}
+            <input class="form-control me-2" name="comment_text" placeholder="Add a comment..." />
+            <button class="btn btn-sm btn-secondary">Post</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <p>No posts available.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  // Heart pop CSS
+  const style = document.createElement('style');
+  style.textContent = `
+    .heart-pop { animation: heartpop 280ms ease; display:inline-block; }
+    @keyframes heartpop { 0% { transform: scale(1); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
+    /* Liked visual effect while keeping the same 🫀 icon */
+    .heart-liked { text-shadow: 0 0 6px rgba(244,166,181,0.85), 0 0 2px rgba(244,166,181,0.6); }
+    .meta-item { letter-spacing: .2px; }
+  `;
+  document.head.appendChild(style);
+})();
+</script>
+<script>
+(function(){
+  function handleLikeForm(form){
+    form.addEventListener('submit', async function(ev){
+      ev.preventDefault();
+      const fd = new FormData(form);
+      const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+      const postId = form.closest('[data-post-id]').dataset.postId;
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: {'X-Requested-With':'XMLHttpRequest','X-CSRFToken': csrf},
+        body: fd
+      });
+      if(!res.ok) return;
+      const data = await res.json();
+      const heart = document.getElementById('heart-'+postId);
+      const likesSpan = document.getElementById('likes-count-'+postId);
+      if(heart){
+        // Keep the same symbol always, only add effects
+        heart.textContent = '🫀';
+        if(data.liked){
+          heart.classList.add('heart-liked');
+          heart.classList.remove('heart-pop');
+          void heart.offsetWidth; // reflow to restart animation
+          heart.classList.add('heart-pop');
+        } else {
+          heart.classList.remove('heart-liked');
+        }
+      }
+      if(likesSpan){ likesSpan.textContent = data.likes_count + ' likes'; }
+    });
+  }
+
+  function handleCommentForm(form){
+    form.addEventListener('submit', async function(ev){
+      ev.preventDefault();
+      const fd = new FormData(form);
+      const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+      const wrapper = form.closest('[data-post-id]');
+      const postId = wrapper.dataset.postId;
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: {'X-Requested-With':'XMLHttpRequest','X-CSRFToken': csrf},
+        body: fd
+      });
+      if(!res.ok) return;
+      const data = await res.json();
+      const list = document.getElementById('comments-list-'+postId);
+      const empty = list?.querySelector('[data-empty=true]');
+      if(empty){ empty.remove(); }
+      const div = document.createElement('div');
+      div.className = 'small text-muted';
+      div.textContent = data.comment.user + ': ' + data.comment.text;
+      list?.appendChild(div);
+      // clear input
+      const input = form.querySelector('input[name=comment_text]');
+      if(input) input.value = '';
+      // update count label if present link
+      const link = wrapper.querySelector('a[href="#comments-'+postId+'"]');
+      if(link){ link.textContent = '💬 ' + data.comments_count + ' comments'; }
+    });
+  }
+
+  document.querySelectorAll('.js-like-form').forEach(handleLikeForm);
+  document.querySelectorAll('.js-comment-form').forEach(handleCommentForm);
+  document.querySelectorAll('.js-delete-form').forEach(function(form){
+    form.addEventListener('submit', async function(ev){
+      ev.preventDefault();
+      if(!confirm('Delete this post?')) return;
+      const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+      const card = form.closest('[data-post-id]');
+      const res = await fetch(form.action, {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf}});
+      if(res.ok){
+        const data = await res.json();
+        if(data.ok && card){ card.remove(); }
+      }
+    });
+  });
+
+  const composer = document.querySelector('.js-composer-form');
+  if(composer){
+    composer.addEventListener('submit', async function(ev){
+      // For images, easiest reliable path is to submit and reload
+      // so that the newly uploaded file URL resolves and appears in feed.
+      // Optionally this can be converted to full AJAX with a small API.
+    });
+  }
+})();
+</script>
+{% endblock %}

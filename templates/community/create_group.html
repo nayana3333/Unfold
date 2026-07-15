@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Create Group - Community{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .create-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  
+  .create-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    padding: 32px;
+  }
+  
+  .create-card h1 {
+    margin: 0 0 24px;
+    font-weight: 800;
+    color: #333;
+  }
+  
+  .form-control, .form-select {
+    border: 2px solid rgba(244, 166, 181, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: #F4A6B5;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+  }
+  
+  .submit-btn {
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 166, 181, 0.3);
+  }
+  
+  .form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 14px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-container">
+  <div class="create-card">
+    <h1>Create a New Group</h1>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div>
+        <label class="form-label">Group Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <div style="color: #dc3545; font-size: 13px; margin-top: -12px; margin-bottom: 12px;">{{ form.name.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        <label class="form-label">Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div style="color: #dc3545; font-size: 13px; margin-top: -12px; margin-bottom: 12px;">{{ form.description.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        <label class="form-label">Visibility</label>
+        {{ form.visibility }}
+        {% if form.visibility.errors %}
+          <div style="color: #dc3545; font-size: 13px; margin-top: -12px; margin-bottom: 12px;">{{ form.visibility.errors }}</div>
+        {% endif %}
+      </div>
+      <div>
+        <label class="form-label">Cover Image (Optional)</label>
+        {{ form.cover_image }}
+        {% if form.cover_image.errors %}
+          <div style="color: #dc3545; font-size: 13px; margin-top: -12px; margin-bottom: 12px;">{{ form.cover_image.errors }}</div>
+        {% endif %}
+      </div>
+      {% if form.non_field_errors %}
+        <div style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+      <button type="submit" class="submit-btn">Create Group</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

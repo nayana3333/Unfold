@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Browse Directory - Counseling{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .directory-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .directory-header {
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+  }
+  
+  .filter-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .doc-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .doc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(244, 166, 181, 0.15);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="directory-container">
+  <div class="directory-header">
+    <h1>Browse Psychiatrist Directory</h1>
+    <p style="margin: 8px 0 0; opacity: 0.95;">Find the right counselor for you</p>
+  </div>
+  
+  <div class="filter-card">
+    <form method="get" action="{% url 'counseling:directory' %}">
+      <div class="row g-2">
+        <div class="col-md-4">
+          <input type="text" name="search" class="form-control" placeholder="Search by name or specialization..." value="{{ request.GET.search }}">
+        </div>
+        <div class="col-md-3">
+          <select name="specialization" class="form-select">
+            <option value="">All Specializations</option>
+            {% for spec in specializations %}
+            <option value="{{ spec }}" {% if request.GET.specialization == spec %}selected{% endif %}>{{ spec }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select name="rating" class="form-select">
+            <option value="">All Ratings</option>
+            <option value="4.5" {% if request.GET.rating == "4.5" %}selected{% endif %}>4.5★+</option>
+            <option value="4.0" {% if request.GET.rating == "4.0" %}selected{% endif %}>4.0★+</option>
+            <option value="3.5" {% if request.GET.rating == "3.5" %}selected{% endif %}>3.5★+</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="book-btn" style="width: 100%;">Filter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div class="row g-3">
+    {% for psychiatrist in psychiatrists %}
+    <div class="col-md-6 col-lg-4">
+      <div class="doc-card">
+        <div class="text-center mb-3">
+          {% if psychiatrist.photo %}
+            <img src="{{ psychiatrist.photo.url }}" alt="{{ psychiatrist.full_name }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #F4A6B5;">
+          {% else %}
+            <div class="avatar-initial" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #F4A6B5;">{{ psychiatrist.full_name|first|upper }}</div>
+          {% endif %}
+        </div>
+        <h4 class="text-center mb-2">{{ psychiatrist.full_name }}</h4>
+        <div class="text-center text-muted small mb-2">{{ psychiatrist.specialization|default:"General" }}</div>
+        <div class="text-center rating mb-3">
+          {% if psychiatrist.rating %}
+            {% for i in "12345" %}
+              {% if forloop.counter <= psychiatrist.rating|floatformat:0|add:"0"|make_list|first|add:"0" %}
+                ★
+              {% else %}
+                ☆
+              {% endif %}
+            {% endfor %}
+            ({{ psychiatrist.rating|floatformat:1 }})
+          {% else %}
+            ★★★★★ (New)
+          {% endif %}
+        </div>
+        {% if psychiatrist.bio %}
+        <p class="small text-muted mb-3" style="text-align: center;">{{ psychiatrist.bio|truncatewords:20 }}</p>
+        {% endif %}
+        <div class="text-center">
+          {% if user.is_authenticated %}
+            <a href="{% url 'counseling:book_appointment' psychiatrist.id %}" class="book-btn">Book Appointment</a>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="book-btn">Login to Book</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="doc-card text-center py-5">
+        <p class="text-muted">No psychiatrists found matching your criteria.</p>
+        <a href="{% url 'counseling:directory' %}" class="browse-btn">Clear Filters</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  {% if is_paginated %}
+  <div class="text-center mt-4">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="browse-btn">Previous</a>
+    {% endif %}
+    <span class="mx-3">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="browse-btn">Next</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

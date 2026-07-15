@@ -1,0 +1,576 @@
+﻿{% extends "base.html" %}
+{% block title %}Unfold - Counseling{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .counseling-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .counsel-header {
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .counsel-header h1 {
+    margin: 0;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: 0.3px;
+  }
+  
+  .counsel-header .tagline {
+    opacity: 0.95;
+    font-size: 15px;
+    margin-top: 8px;
+  }
+  
+  .tabs-wrap {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .tab-btn {
+    border: none;
+    background: transparent;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+  
+  .tab-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  
+  .tab-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .login-buttons {
+    margin-top: 12px;
+  }
+  
+  .login-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0 4px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .login-btn:hover {
+    background: white;
+    color: #F88379;
+  }
+  
+  /* Patient Dashboard */
+  .filter-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .doc-card {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 16px;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .doc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(244, 166, 181, 0.15);
+  }
+  
+  .doc-photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f0f0f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  
+  .rating {
+    color: #F4B400;
+    font-size: 16px;
+  }
+  
+  .book-btn {
+    background: #F4A6B5;
+    border: none;
+    color: white;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .book-btn:hover {
+    background: #F88379;
+    color: white;
+  }
+  
+  .sidebar-card {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .sidebar-card h6 {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+
+  .trust-roadmap-card {
+    border: 1px solid rgba(244, 166, 181, 0.35);
+    background: #fff;
+  }
+
+  .trust-roadmap-card .trust-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #9f405d;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .trust-roadmap-card p {
+    color: #5c5357;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin: 0 0 12px;
+  }
+
+  .trust-points {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .trust-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #3f363a;
+    font-size: 0.9rem;
+  }
+
+  .trust-points i {
+    color: #F88379;
+    margin-top: 3px;
+  }
+  
+  .sos-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s ease;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+  }
+  
+  .sos-btn:hover {
+    background: #c82333;
+    color: white;
+  }
+  
+  .helpline-btn {
+    background: white;
+    color: #F4A6B5;
+    border: 2px solid #F4A6B5;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+  }
+  
+  .helpline-btn:hover {
+    background: #FFF5F9;
+    color: #F88379;
+    border-color: #F88379;
+  }
+  
+  .form-control, .form-select {
+    border: 2px solid rgba(244, 166, 181, 0.3);
+    border-radius: 12px;
+    padding: 8px 12px;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: #F4A6B5;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+  }
+  
+  .browse-btn {
+    background: white;
+    color: #F4A6B5;
+    border: 2px solid #F4A6B5;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .browse-btn:hover {
+    background: #FFF5F9;
+    color: #F88379;
+    border-color: #F88379;
+  }
+  
+  .slot-item {
+    padding: 8px 12px;
+    margin: 4px 0;
+    background: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+  }
+  
+  .slot-item:hover {
+    background: #FFF5F9;
+    border-color: #F4A6B5;
+  }
+  
+  .slot-item.selected {
+    background: #FFF5F9;
+    border-color: #F4A6B5;
+    font-weight: 600;
+  }
+  
+  .slot-item.booked {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    .counseling-container {
+      padding: 16px;
+    }
+    
+    .tabs-wrap {
+      width: 100%;
+    }
+    
+    .tab-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="counseling-container">
+  <div class="counsel-header">
+    <h1>Psychiatrist Counseling</h1>
+    <div class="tagline">Calm, confidential support from verified women psychiatrists.</div>
+    <div class="tabs-wrap">
+      <button class="tab-btn active" data-tab="patient">Patient Dashboard</button>
+      <button class="tab-btn" data-tab="psy">Psychiatrist Dashboard</button>
+      <button class="tab-btn" data-tab="session">Session</button>
+      <button class="tab-btn" data-tab="feedback">Feedback</button>
+    </div>
+    <div class="login-buttons">
+      <small style="opacity: 0.9;">Role-based access:</small>
+      <a href="{% url 'accounts:login_patient' %}" class="login-btn">Patient Login</a>
+      <a href="{% url 'accounts:login_counselor' %}" class="login-btn">Psychiatrist Login</a>
+      {% if user.is_authenticated %}
+        {% if user.psychiatrist_profile %}
+          <a href="{% url 'counseling:psychiatrist_dashboard' %}" class="login-btn">My Dashboard</a>
+        {% else %}
+          <a href="{% url 'counseling:patient_dashboard' %}" class="login-btn">My Dashboard</a>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Patient Dashboard -->
+  <div id="tab-patient">
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <div class="filter-section">
+          <form method="get" action="{% url 'counseling:list' %}" id="filterForm">
+            <div class="row g-2">
+              <div class="col-md-5">
+                <input 
+                  type="text" 
+                  name="specialization" 
+                  class="form-control" 
+                  placeholder="Filter by specialization (e.g., Trauma, Anxiety)" 
+                  value="{{ selected_specialization }}"
+                />
+              </div>
+              <div class="col-md-3">
+                <select name="rating" class="form-select">
+                  <option value="">Rating: All</option>
+                  <option value="4.5" {% if selected_rating == "4.5" %}selected{% endif %}>4.5 stars+</option>
+                  <option value="4.0" {% if selected_rating == "4.0" %}selected{% endif %}>4.0 stars+</option>
+                  <option value="3.5" {% if selected_rating == "3.5" %}selected{% endif %}>3.5 stars+</option>
+                  <option value="3.0" {% if selected_rating == "3.0" %}selected{% endif %}>3.0 stars+</option>
+                </select>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <button type="submit" class="browse-btn">Apply Filters</button>
+                <a href="{% url 'counseling:directory' %}" class="browse-btn" style="margin-left: 8px;">Browse Directory</a>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="row g-3">
+          {% for psychiatrist in psychiatrists %}
+          <div class="col-md-6">
+            <div class="doc-card">
+              <div class="d-flex align-items-center gap-3 mb-2">
+                {% if psychiatrist.photo %}
+                  <img class="doc-photo" src="{{ psychiatrist.photo.url }}" alt="{{ psychiatrist.full_name }}" />
+                {% else %}
+                  <div class="doc-photo avatar-initial">{{ psychiatrist.full_name|first|upper }}</div>
+                {% endif %}
+                <div>
+                  <strong>{{ psychiatrist.full_name }}</strong>
+                  <div class="text-muted small">
+                    {{ psychiatrist.specialization|default:"General" }} &middot; {{ psychiatrist.years_experience }} yrs
+                  </div>
+                  <div class="rating">
+                    {% if psychiatrist.rating %}
+                      {% for i in "12345" %}
+                        {% if forloop.counter <= psychiatrist.rating|floatformat:0|add:"0"|make_list|first|add:"0" %}
+                          <i class="fa-solid fa-star"></i>
+                        {% else %}
+                          <i class="fa-regular fa-star"></i>
+                        {% endif %}
+                      {% endfor %}
+                      ({{ psychiatrist.rating|floatformat:1 }})
+                    {% else %}
+                      <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i> (New)
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% if psychiatrist.bio %}
+              <div class="small text-muted mb-2">{{ psychiatrist.bio|truncatewords:15 }}</div>
+              {% endif %}
+              <div class="small text-muted mb-2">
+                Available: 
+                {% if psychiatrist.available_chat %}<i class="fa-regular fa-comment-dots"></i> Chat{% endif %}
+                {% if psychiatrist.available_voice %} <i class="fa-solid fa-phone"></i> Voice{% endif %}
+                {% if psychiatrist.available_video %} <i class="fa-solid fa-video"></i> Video{% endif %}
+              </div>
+              {% if user.is_authenticated %}
+                <a href="{% url 'counseling:book_appointment' psychiatrist.id %}" class="book-btn">Book Appointment</a>
+              {% else %}
+                <a href="{% url 'accounts:login' %}" class="book-btn">Login to Book</a>
+              {% endif %}
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-12">
+            <div class="doc-card text-center py-5 care-empty-state">
+              <span class="empty-eyebrow">Directory</span>
+              <h3>No matching specialists.</h3>
+              <p class="text-muted">Try clearing filters or browsing the full directory for available counselors.</p>
+              <a href="{% url 'counseling:list' %}" class="browse-btn">Clear Filters</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-4">
+        {% if user.is_authenticated %}
+        <div class="sidebar-card mb-3">
+          <h6>My Appointments</h6>
+          <div class="small text-muted mb-2">
+            <a href="{% url 'counseling:patient_dashboard' %}" class="text-decoration-none" style="color: #F4A6B5;">View all appointments &rarr;</a>
+          </div>
+        </div>
+        {% endif %}
+        <div class="sidebar-card">
+          <h6>Emergency SOS</h6>
+          <a href="tel:112" class="sos-btn"><i class="fa-solid fa-phone"></i> Call 112 (India Emergency)</a>
+          <a href="tel:1091" class="helpline-btn"><i class="fa-solid fa-phone"></i> Women Helpline: 1091</a>
+          <a href="https://www.womenhelp.gov.in/" target="_blank" class="helpline-btn"><i class="fa-solid fa-globe"></i> Women Help Website</a>
+        </div>
+        <div class="sidebar-card trust-roadmap-card">
+          <div class="trust-label"><i class="fa-solid fa-shield-halved"></i> Identity review</div>
+          <h6>For sensitive spaces</h6>
+          <p>Unfold can support optional review for private rooms while keeping sensitive documents outside the app database.</p>
+          <ul class="trust-points">
+            <li><i class="fa-solid fa-check"></i><span>Store review status and audit notes only.</span></li>
+            <li><i class="fa-solid fa-check"></i><span>Use review for sensitive groups and bookings.</span></li>
+            <li><i class="fa-solid fa-check"></i><span>Keep regular signup fast and non-blocking.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Psychiatrist Dashboard -->
+  <div id="tab-psy" class="d-none">
+    {% if user.is_authenticated and user.psychiatrist_profile %}
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="sidebar-card mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <strong>Appointment Calendar</strong>
+              <div>
+                <span class="me-2">Status:</span>
+                <button class="book-btn" id="toggleStatus">Available</button>
+              </div>
+            </div>
+            <div style="height: 260px; border-radius: 12px; background: #FFF7FA; border: 1px dashed rgba(244,166,181,.6); display: flex; align-items: center; justify-content: center; color: #666;">
+              <a href="{% url 'counseling:psychiatrist_dashboard' %}" class="browse-btn">View Full Dashboard</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="sidebar-card">
+            <h6>Quick Actions</h6>
+            <a href="{% url 'counseling:psychiatrist_dashboard' %}" class="book-btn" style="width: 100%; margin-bottom: 8px; text-align: center;">Manage Appointments</a>
+            <a href="{% url 'counseling:psychiatrist_dashboard' %}" class="browse-btn" style="width: 100%; text-align: center;">View Patients</a>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="sidebar-card text-center py-5">
+        <p class="text-muted">Please login as a psychiatrist to access the dashboard.</p>
+        <a href="{% url 'accounts:login_counselor' %}" class="book-btn">Psychiatrist Login</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Session (standalone) -->
+  <div id="tab-session" class="d-none">
+    {% if user.is_authenticated %}
+      <div class="sidebar-card">
+        <div style="background: linear-gradient(135deg, #F88379, #F4A6B5); color: white; padding: 12px 16px; border-radius: 16px 16px 0 0; font-weight: 600;">Active Sessions</div>
+        <div style="padding: 16px; background: #FFF5F9;">
+          <p class="text-muted">View your active counseling sessions.</p>
+          <a href="{% url 'counseling:patient_dashboard' %}" class="book-btn">View My Sessions</a>
+        </div>
+      </div>
+    {% else %}
+      <div class="sidebar-card text-center py-5">
+        <p class="text-muted">Please login to access your sessions.</p>
+        <a href="{% url 'accounts:login' %}" class="book-btn">Login</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Feedback -->
+  <div id="tab-feedback" class="d-none">
+    {% if user.is_authenticated %}
+      <div class="sidebar-card">
+        <h5 class="mb-2">Rate your session</h5>
+        <p class="text-muted small mb-3">Submit feedback for your completed sessions.</p>
+        <a href="{% url 'counseling:patient_dashboard' %}" class="book-btn">View Completed Sessions</a>
+      </div>
+    {% else %}
+      <div class="sidebar-card text-center py-5">
+        <p class="text-muted">Please login to submit feedback.</p>
+        <a href="{% url 'accounts:login' %}" class="book-btn">Login</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panes = {
+    patient: document.getElementById('tab-patient'),
+    psy: document.getElementById('tab-psy'),
+    session: document.getElementById('tab-session'),
+    feedback: document.getElementById('tab-feedback')
+  };
+  
+  tabs.forEach(btn => btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    tabs.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(panes).forEach(p => p.classList.add('d-none'));
+    if (panes[tab]) {
+      panes[tab].classList.remove('d-none');
+    }
+  }));
+
+  // Status toggle
+  document.getElementById('toggleStatus')?.addEventListener('click', function(){
+    this.textContent = this.textContent === 'Available' ? 'Unavailable' : 'Available';
+  });
+})();
+</script>
+{% endblock %}
+
+

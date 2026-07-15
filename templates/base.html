@@ -1,0 +1,108 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Unfold{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'theme.css' %}?v=20251021">
+    <link rel="stylesheet" href="{% static 'super.css' %}?v=20260746">
+    <style>
+        .messages-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            z-index: 999;
+            position: relative;
+        }
+        .message-alert {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .message-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .message-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .message-info, .message-warning, .message-debug {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .message-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.6;
+            margin-left: 12px;
+            padding: 0;
+            line-height: 1;
+        }
+        .message-close:hover {
+            opacity: 1;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <nav class="navbar">
+                <a class="navbar-brand" href="{% url 'home' %}" aria-label="Unfold home"><span class="brand-wordmark">Unfold</span></a>
+                <div class="nav-icons">
+                    <a href="{% url 'home' %}" class="nav-icon" data-nav="home" title="Home" aria-label="Home"><span class="sr-only">Home</span></a>
+                    <a href="{% url 'explore' %}" class="nav-icon" data-nav="explore" title="Explore" aria-label="Explore"><span class="sr-only">Explore</span></a>
+                    <a href="{% url 'counseling:list' %}" class="nav-icon" data-nav="counseling" title="Counseling" aria-label="Counseling"><span class="sr-only">Counseling</span></a>
+                    <a href="{% url 'community:list' %}" class="nav-icon" data-nav="community" title="Community" aria-label="Community"><span class="sr-only">Community</span></a>
+                    <a href="{% url 'chatbot:chat' %}" class="nav-icon" data-nav="chatbot" title="AI Chatbot" aria-label="AI Chatbot"><span class="sr-only">AI Chatbot</span></a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'moderation:dashboard' %}" class="nav-icon" data-nav="moderation" title="Moderation" aria-label="Moderation"><span class="sr-only">Moderation</span></a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'accounts:profile' %}" class="nav-icon" data-nav="profile" title="Profile" aria-label="Profile"><span class="sr-only">Profile</span></a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="nav-icon" data-nav="login" title="Login" aria-label="Login"><span class="sr-only">Login</span></a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} message-alert message-{{ message.tags }}">
+                <span>{{ message }}</span>
+                <button type="button" class="message-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+
+
+
+

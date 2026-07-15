@@ -1,0 +1,350 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Moderation - Unfold{% endblock %}
+
+{% block extra_head %}
+<style>
+  .moderation-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 20px 56px;
+  }
+
+  .moderation-hero,
+  .ops-stat,
+  .ops-panel {
+    background: #fff;
+    border: 1px solid var(--line, #e4ded7);
+    box-shadow: none;
+  }
+
+  .moderation-hero {
+    padding: 28px;
+    margin-bottom: 18px;
+  }
+
+  .moderation-hero h1 {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    line-height: 1.02;
+    margin: 0 0 10px;
+    letter-spacing: 0;
+  }
+
+  .moderation-hero p {
+    color: var(--muted, #64605d);
+    max-width: 700px;
+    margin: 0;
+  }
+
+  .ops-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .ops-stat,
+  .ops-panel {
+    padding: 18px;
+  }
+
+  .ops-stat strong {
+    display: block;
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  .ops-stat span {
+    color: var(--muted, #64605d);
+    font-size: 0.86rem;
+  }
+
+  .ops-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 14px;
+  }
+
+  .ops-panel h2 {
+    font-size: 1rem;
+    margin: 0 0 14px;
+  }
+
+  .ops-item {
+    border-top: 1px solid var(--line, #e4ded7);
+    padding: 14px 0;
+  }
+
+  .ops-item:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .ops-item p {
+    margin: 4px 0 0;
+    color: var(--muted, #64605d);
+  }
+
+  .ops-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .ops-actions button {
+    background: #111;
+    color: #fff;
+    border: 1px solid #111;
+    padding: 8px 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .ops-actions .secondary {
+    background: #fff;
+    color: #111;
+    border-color: var(--line-strong, #cfc7bf);
+  }
+
+  .empty-note {
+    color: var(--muted, #64605d);
+    margin: 0;
+    border: 1px dashed var(--line, #e4ded7);
+    background: var(--surface-soft, #fbf7f4);
+    padding: 16px;
+  }
+
+  .verification-roadmap {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 18px;
+    align-items: start;
+    margin-top: 14px;
+  }
+
+  .roadmap-lead {
+    color: var(--muted, #64605d);
+    margin: 0 0 16px;
+  }
+
+  .roadmap-steps {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .roadmap-steps li {
+    border: 1px solid var(--line, #e4ded7);
+    background: var(--surface-soft, #fbf7f4);
+    padding: 12px 14px;
+  }
+
+  .roadmap-steps strong {
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .roadmap-steps span {
+    color: var(--muted, #64605d);
+    font-size: 0.9rem;
+  }
+
+  .roadmap-status-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .roadmap-status {
+    border: 1px solid var(--line, #e4ded7);
+    padding: 12px;
+    text-align: center;
+    font-weight: 800;
+    background: #fff;
+  }
+
+  .roadmap-status span {
+    display: block;
+    color: var(--muted, #64605d);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .ops-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .ops-filter select,
+  .ops-filter button,
+  .ops-filter a {
+    min-height: 40px;
+  }
+
+  .ops-note {
+    width: min(100%, 420px);
+    min-height: 40px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .ops-grid,
+    .ops-layout,
+    .verification-roadmap {
+      grid-template-columns: 1fr;
+    }
+
+    .roadmap-status-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="moderation-shell">
+  <section class="moderation-hero">
+    <div class="section-kicker">Trust and safety operations</div>
+    <h1>Moderation dashboard</h1>
+    <p>Review content reports, triage critical safety signals, and approve verified counselor accounts before they can serve users.</p>
+  </section>
+
+  <section class="ops-grid" aria-label="Moderation metrics">
+    <div class="ops-stat"><strong>{{ report_counts.open }}</strong><span>Open reports</span></div>
+    <div class="ops-stat"><strong>{{ report_counts.reviewing }}</strong><span>In review</span></div>
+    <div class="ops-stat"><strong>{{ report_counts.critical }}</strong><span>Critical reports</span></div>
+    <div class="ops-stat"><strong>{{ pending_counselor_count }}</strong><span>Pending counselors</span></div>
+  </section>
+
+  <section class="ops-layout">
+    <div class="ops-panel">
+      <h2>Active reports</h2>
+      <form class="ops-filter" method="get">
+        <select name="status" class="form-select">
+          <option value="">Active statuses</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <select name="severity" class="form-select">
+          <option value="">All severities</option>
+          {% for value, label in severity_choices %}
+            <option value="{{ value }}" {% if selected_severity == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="modal-btn">Filter</button>
+        <a href="{% url 'moderation:dashboard' %}" class="browse-btn">Reset</a>
+      </form>
+      {% for report in open_reports %}
+        <article class="ops-item">
+          <strong>#{{ report.id }} {{ report.get_reason_display }}</strong>
+          <p>Status: {{ report.get_status_display }} | Severity: {{ report.get_severity_display }}</p>
+          <p>Reporter: {{ report.reporter.username|default:"Anonymous" }} | Target: {{ report.content_type.app_label }}.{{ report.content_type.model }}</p>
+          <p>{{ report.details|default:"No details provided."|truncatewords:28 }}</p>
+          <div class="ops-actions">
+            <form method="post" action="{% url 'moderation:update_report' report.id 'reviewing' %}">
+              {% csrf_token %}
+              <input class="form-control ops-note" name="resolution_note" placeholder="Reviewer note (optional)" value="{{ report.resolution_note }}">
+              <button type="submit" class="secondary">Reviewing</button>
+            </form>
+            <form method="post" action="{% url 'moderation:update_report' report.id 'resolved' %}">
+              {% csrf_token %}
+              <input class="form-control ops-note" name="resolution_note" placeholder="Resolution note">
+              <button type="submit">Resolve</button>
+            </form>
+            <form method="post" action="{% url 'moderation:update_report' report.id 'dismissed' %}">
+              {% csrf_token %}
+              <input class="form-control ops-note" name="resolution_note" placeholder="Dismissal note">
+              <button type="submit" class="secondary">Dismiss</button>
+            </form>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-note">No active reports. New user reports will appear here for triage.</p>
+      {% endfor %}
+    </div>
+
+    <div class="ops-panel">
+      <h2>Counselor verification</h2>
+      {% for profile in pending_counselors %}
+        <article class="ops-item">
+          <strong>{{ profile.user.username }}</strong>
+          <p>{{ profile.user.email|default:"No email provided" }}</p>
+          <p>Status: {{ profile.get_verification_status_display }}</p>
+          <div class="ops-actions">
+            <form method="post" action="{% url 'moderation:update_counselor' profile.id 'approved' %}">
+              {% csrf_token %}
+              <input class="form-control ops-note" name="note" placeholder="Verification note">
+              <button type="submit">Approve</button>
+            </form>
+            <form method="post" action="{% url 'moderation:update_counselor' profile.id 'rejected' %}">
+              {% csrf_token %}
+              <input class="form-control ops-note" name="note" placeholder="Reason for rejection">
+              <button type="submit" class="secondary">Reject</button>
+            </form>
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty-note">No counselor profiles are waiting for approval. Pending registrations will appear here.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="ops-panel" style="margin-top:14px;">
+    <h2>Recent moderation actions</h2>
+    {% for action in recent_actions %}
+      <article class="ops-item">
+        <strong>{{ action.get_action_display }}</strong>
+        <p>{{ action.from_value|default:"-" }} -> {{ action.to_value|default:"-" }} | {{ action.created_at|date:"M d, Y H:i" }}</p>
+        <p>{{ action.target_label }}{% if action.moderator %} by {{ action.moderator.username }}{% endif %}</p>
+        {% if action.note %}<p>{{ action.note|truncatewords:24 }}</p>{% endif %}
+      </article>
+    {% empty %}
+      <p class="empty-note">No moderation actions yet. Status changes and counselor reviews will be logged here.</p>
+    {% endfor %}
+  </section>
+
+  <section class="ops-panel verification-roadmap" aria-label="Identity review plan">
+    <div>
+      <div class="section-kicker">Identity review</div>
+      <h2>Private-space review plan</h2>
+      <p class="roadmap-lead">
+        Optional review can be used for sensitive spaces. Unfold stores review status and audit notes, not sensitive documents.
+      </p>
+      <div class="roadmap-status-grid" aria-label="Verification statuses">
+        <div class="roadmap-status"><span>Status</span>Not started</div>
+        <div class="roadmap-status"><span>Status</span>In review</div>
+        <div class="roadmap-status"><span>Status</span>Verified</div>
+        <div class="roadmap-status"><span>Status</span>Rejected</div>
+      </div>
+    </div>
+    <ul class="roadmap-steps">
+      <li>
+        <strong>1. Review request</strong>
+        <span>User starts review only when joining sensitive spaces.</span>
+      </li>
+      <li>
+        <strong>2. Provider or moderator check</strong>
+        <span>A third-party provider or trained moderator checks eligibility. Unfold receives only the result.</span>
+      </li>
+      <li>
+        <strong>3. Minimal storage</strong>
+        <span>Store status, reviewer, timestamp, and reason codes. Do not store ID images in the application database.</span>
+      </li>
+      <li>
+        <strong>4. Re-review</strong>
+        <span>Rejected users can request a manual re-check.</span>
+      </li>
+    </ul>
+  </section>
+</div>
+{% endblock %}
+
+

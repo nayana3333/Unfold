@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Session with {{ booking.psychiatrist.full_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .session-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  
+  .session-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    overflow: hidden;
+  }
+  
+  .session-header {
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    padding: 20px 24px;
+  }
+  
+  .session-body {
+    padding: 24px;
+    min-height: 400px;
+    background: #FFF5F9;
+  }
+  
+  .session-input {
+    padding: 16px;
+    border-top: 2px solid #f4dbe2;
+    background: white;
+  }
+  
+  .message-bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    max-width: 70%;
+  }
+  
+  .message-user {
+    background: #ffe3ee;
+    margin-left: auto;
+    text-align: right;
+  }
+  
+  .message-doctor {
+    background: white;
+    margin-right: auto;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="session-container">
+  <div class="session-card">
+    <div class="session-header">
+      <h3 style="margin: 0;">Session with Dr. {{ booking.psychiatrist.full_name }}</h3>
+      <div style="opacity: 0.9; font-size: 14px; margin-top: 4px;">
+        {{ booking.slot.start|date:"F d, Y" }} • {{ booking.get_mode_display }}
+      </div>
+    </div>
+    
+    <div class="session-body" id="sessionMessages">
+      {% if can_start %}
+        <div class="message-bubble message-doctor">
+          <strong>Dr. {{ booking.psychiatrist.full_name }}:</strong> Hello! How are you feeling today?
+        </div>
+      {% else %}
+        <div class="message-bubble message-doctor">
+          Session will be available 15 minutes before the scheduled time.
+        </div>
+      {% endif %}
+    </div>
+    
+    {% if can_start %}
+    <div class="session-input">
+      <form id="sessionForm" style="display: flex; gap: 12px;">
+        {% csrf_token %}
+        <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." />
+        <button type="submit" class="action-btn">Send</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+// Session messaging functionality
+document.getElementById('sessionForm')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const input = document.getElementById('messageInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  // Add message to UI (frontend only for now)
+  const messagesDiv = document.getElementById('sessionMessages');
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble message-user';
+  bubble.innerHTML = '<strong>You:</strong> ' + text;
+  messagesDiv.appendChild(bubble);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  
+  input.value = '';
+});
+</script>
+{% endblock %}
+

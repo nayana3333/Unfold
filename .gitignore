@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+pytest-cache-files-*/
+
+# Virtualenv
+venv/
+.venv/
+ENV/
+env/
+.env
+.env.*
+!.env.example
+
+# Django
+*.sqlite3
+db_*.sqlite3
+media/
+staticfiles/
+*.log
+
+# Frontend/build outputs
+node_modules/
+dist/
+build/
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

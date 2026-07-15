@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Patient Dashboard - Counseling{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .dashboard-header {
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+  }
+  
+  .dashboard-header h1 {
+    margin: 0;
+    font-weight: 800;
+    font-size: 28px;
+  }
+  
+  .dashboard-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .booking-item {
+    padding: 16px;
+    border: 2px solid #f0f0f0;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    transition: all 0.2s ease;
+  }
+  
+  .booking-item:hover {
+    border-color: #F4A6B5;
+    box-shadow: 0 4px 12px rgba(244, 166, 181, 0.1);
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .status-pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+  
+  .status-confirmed {
+    background: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  .status-completed {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  
+  .action-btn {
+    background: #F4A6B5;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin-right: 8px;
+  }
+  
+  .action-btn:hover {
+    background: #F88379;
+    color: white;
+  }
+  
+  .action-btn.secondary {
+    background: white;
+    color: #F4A6B5;
+    border: 2px solid #F4A6B5;
+  }
+  
+  .action-btn.secondary:hover {
+    background: #FFF5F9;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container care-dashboard-shell">
+  <div class="dashboard-header care-dashboard-hero">
+    <span class="section-kicker">Patient workspace</span>
+    <h1>My counseling dashboard.</h1>
+    <p style="margin: 8px 0 0; opacity: 0.95;">Manage upcoming appointments, sessions, and follow-up feedback.</p>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h3 style="margin:0;">{{ pending_count }}</h3>
+        <p class="text-muted" style="margin:4px 0 0;">Pending requests</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h3 style="margin:0;">{{ confirmed_count }}</h3>
+        <p class="text-muted" style="margin:4px 0 0;">Confirmed sessions</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h3 style="margin:0;">{{ completed_count }}</h3>
+        <p class="text-muted" style="margin:4px 0 0;">Completed sessions</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="dashboard-card">
+        <h3 style="margin: 0 0 20px; color: #333;">Upcoming Appointments</h3>
+        {% if upcoming_bookings %}
+          {% for booking in upcoming_bookings %}
+          <div class="booking-item">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <strong style="font-size: 18px;">Dr. {{ booking.psychiatrist.full_name }}</strong>
+                <div class="text-muted small">{{ booking.psychiatrist.specialization|default:"General" }}</div>
+              </div>
+              <span class="status-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+            </div>
+            <div class="mb-2">
+              <strong>Date & Time:</strong> {{ booking.slot.start|date:"F d, Y" }} at {{ booking.slot.start|date:"g:i A" }}
+            </div>
+            <div class="mb-2">
+              <strong>Mode:</strong> {{ booking.get_mode_display }}
+            </div>
+            {% if booking.notes %}
+            <div class="mb-2">
+              <strong>Notes:</strong> {{ booking.notes|truncatewords:20 }}
+            </div>
+            {% endif %}
+            <div class="mt-3">
+              {% if booking.status == 'confirmed' %}
+                <a href="{% url 'counseling:session' booking.id %}" class="action-btn">Join Session</a>
+              {% endif %}
+              {% if booking.status == 'pending' %}
+                <span class="text-muted small">Waiting for confirmation</span>
+              {% endif %}
+              {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                <form method="post" action="{% url 'counseling:update_booking_status' booking.id 'cancelled' %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="action-btn secondary" onclick="return confirm('Cancel this appointment?')">Cancel</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="care-mini-empty">
+            No upcoming appointments yet.
+            <a href="{% url 'counseling:list' %}">Book an appointment</a>
+          </div>
+        {% endif %}
+      </div>
+      
+      <div class="dashboard-card">
+        <h3 style="margin: 0 0 20px; color: #333;">Past Sessions</h3>
+        {% if past_bookings %}
+          {% for booking in past_bookings|slice:":5" %}
+          <div class="booking-item">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <strong>Dr. {{ booking.psychiatrist.full_name }}</strong>
+                <div class="text-muted small">{{ booking.slot.start|date:"F d, Y" }} at {{ booking.slot.start|date:"g:i A" }}</div>
+              </div>
+              <span class="status-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+            </div>
+            {% if booking.status == 'completed' %}
+              <a href="{% url 'counseling:feedback' booking.id %}" class="action-btn secondary">Give Feedback</a>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="care-mini-empty">No past sessions yet.</div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="dashboard-card">
+        <h5 style="margin: 0 0 16px; color: #333;">Quick Actions</h5>
+        <a href="{% url 'counseling:list' %}" class="action-btn" style="width: 100%; text-align: center; margin-bottom: 12px;">Book New Appointment</a>
+        <a href="{% url 'counseling:directory' %}" class="action-btn secondary" style="width: 100%; text-align: center;">Browse Directory</a>
+      </div>
+      
+      <div class="dashboard-card">
+        <h5 style="margin: 0 0 16px; color: #333;">Emergency Support</h5>
+        <a href="tel:112" class="action-btn" style="width: 100%; text-align: center; background: #dc3545; margin-bottom: 8px;">Call 112 (Emergency)</a>
+        <a href="tel:1091" class="action-btn secondary" style="width: 100%; text-align: center;">Women Helpline: 1091</a>
+        <p class="text-muted small" style="margin:12px 0 0;">If you are in immediate danger, call local emergency services first.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

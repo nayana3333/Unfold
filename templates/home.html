@@ -1,0 +1,1722 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Unfold - Home{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: var(--bg);
+  }
+  
+  .home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+  }
+  
+  /* Stories Section */
+  .stories-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .stories-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  
+  .stories-header h3 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 18px;
+  }
+  
+  .add-story-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  
+  .add-story-btn:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+  }
+  
+  .stories-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    padding: 8px 0 16px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .stories-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .story-item {
+    flex: 0 0 auto;
+    width: 70px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .story-item:hover {
+    transform: scale(1.05);
+  }
+  
+  .story-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    padding: 3px;
+    margin: 0 auto 8px;
+    background: var(--header-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .story-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid white;
+    object-fit: cover;
+  }
+  
+  .story-username {
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .stories-hint {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 8px;
+    text-align: center;
+  }
+  
+  /* Main Layout */
+  .main-layout {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+  }
+  
+  .posts-feed {
+    flex: 1;
+    max-width: 600px;
+  }
+  
+  .right-sidebar {
+    width: 320px;
+    position: sticky;
+    top: 100px;
+    align-self: flex-start;
+    height: fit-content;
+  }
+  
+  /* Post Card */
+  .post-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  
+  .post-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+  }
+  
+  .post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+    border: 2px solid #f0f0f0;
+  }
+  
+  .post-user-info {
+    flex: 1;
+  }
+  
+  .post-username {
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+    font-size: 14px;
+  }
+  
+  .post-time {
+    font-size: 12px;
+    color: #8e8e8e;
+    margin: 0;
+  }
+  
+  .post-image {
+    width: 100%;
+    max-height: 600px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .post-actions {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 16px;
+  }
+  
+  .post-action {
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    border: none;
+    background: none;
+    padding: 0;
+    line-height: 1;
+  }
+  
+  .post-action:hover {
+    transform: scale(1.15);
+  }
+  
+  .post-action.like-btn {
+    font-size: 26px;
+    transition: all 0.2s ease;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .post-action.like-btn span {
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
+  
+  .post-action.like-btn.liked span {
+    filter: drop-shadow(0 2px 8px rgba(248, 131, 121, 0.7)) 
+            brightness(1.2) 
+            saturate(1.8)
+            hue-rotate(-15deg);
+    transform: scale(1.2);
+    animation: heartBeat 0.3s ease;
+  }
+  
+  @keyframes heartBeat {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.4); }
+  }
+  
+  .post-action.like-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(248, 131, 121, 0.3);
+    transition: width 0.3s ease, height 0.3s ease;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .post-action.like-btn.liked::before {
+    width: 40px;
+    height: 40px;
+    animation: heartPulse 0.4s ease;
+  }
+  
+  @keyframes heartPulse {
+    0% {
+      width: 0;
+      height: 0;
+      opacity: 1;
+    }
+    50% {
+      width: 50px;
+      height: 50px;
+      opacity: 0.8;
+    }
+    100% {
+      width: 60px;
+      height: 60px;
+      opacity: 0;
+    }
+  }
+  
+  .post-action.save {
+    margin-left: auto;
+  }
+  
+  .post-likes {
+    font-weight: 600;
+    padding: 0 16px 8px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  
+  .post-caption {
+    padding: 0 16px 8px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .post-caption strong {
+    margin-right: 8px;
+    font-weight: 600;
+  }
+  
+  .post-time-bottom {
+    font-size: 10px;
+    color: #8e8e8e;
+    text-transform: uppercase;
+    padding: 0 16px 12px;
+    letter-spacing: 0.5px;
+  }
+  
+  .post-comment-form {
+    display: flex;
+    padding: 12px 16px;
+    border-top: 1px solid #efefef;
+    align-items: center;
+  }
+  
+  .post-comment-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    padding: 0;
+    font-family: var(--font-main);
+  }
+  
+  .post-comment-btn {
+    border: none;
+    background: none;
+    color: #0095f6;
+    font-weight: 600;
+    opacity: 0.3;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    transition: opacity 0.2s ease;
+  }
+  
+  .post-comment-btn.active {
+    opacity: 1;
+  }
+  
+  .post-comment-btn:hover.active {
+    opacity: 0.8;
+  }
+  
+  /* Sidebar Cards */
+  .sidebar-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .sidebar-card h6 {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+  
+  .sidebar-card p {
+    color: var(--text-light);
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  
+  .sidebar-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  .sidebar-btn:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+    color: white;
+  }
+  
+  .sidebar-btn.outline {
+    background: white;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+  
+  .sidebar-btn.outline:hover {
+    background: var(--bg);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  
+  /* Modals */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .modal-overlay.active {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--text-light);
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .modal-close:hover {
+    background: #f0f0f0;
+    color: var(--text);
+  }
+  
+  .modal-form-group {
+    margin-bottom: 20px;
+  }
+  
+  .modal-form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .modal-form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid rgba(244, 166, 181, 0.3);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
+  
+  .modal-form-control:focus {
+    outline: none;
+    border-color: #F4A6B5;
+    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+  }
+  
+  .modal-form-control textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .modal-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .modal-checkbox input {
+    width: auto;
+    cursor: pointer;
+  }
+  
+  .modal-checkbox label {
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    margin: 0;
+  }
+  
+  .modal-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+  }
+  
+  .modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 166, 181, 0.3);
+  }
+  
+  .modal-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .image-preview {
+    margin-top: 12px;
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: 200px;
+  }
+  
+  .image-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 992px) {
+    .right-sidebar {
+      display: none;
+    }
+    
+    .posts-feed {
+      max-width: 100%;
+    }
+    
+    .main-layout {
+      justify-content: flex-start;
+    }
+    
+    .home-container {
+      padding: 0 16px 40px;
+    }
+    
+    .stories-section {
+      padding: 16px;
+    }
+    
+    .post-card {
+      margin-bottom: 20px;
+    }
+    
+    .modal-content {
+      padding: 20px;
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .home-container {
+      padding: 0 12px 30px;
+    }
+    
+    .stories-section {
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    
+    .stories-header h3 {
+      font-size: 16px;
+    }
+    
+    .add-story-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    
+    .story-item {
+      width: 60px;
+    }
+    
+    .story-avatar {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .story-username {
+      font-size: 11px;
+    }
+    
+    .post-header {
+      padding: 12px;
+    }
+    
+    .post-actions {
+      padding: 10px 12px;
+      gap: 12px;
+    }
+    
+    .post-action {
+      font-size: 20px;
+    }
+    
+    .post-action.like-btn {
+      font-size: 22px;
+    }
+    
+    .post-action.like-btn span {
+      font-size: 22px;
+    }
+    
+    .post-caption {
+      padding: 0 12px 8px;
+      font-size: 13px;
+    }
+    
+    .post-likes {
+      padding: 0 12px 8px;
+      font-size: 13px;
+    }
+    
+    .post-comment-form {
+      padding: 10px 12px;
+    }
+    
+    .modal-content {
+      padding: 20px;
+      max-width: 100%;
+      margin: 10px;
+    }
+    
+    .modal-header h3 {
+      font-size: 18px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .stories-header {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .stories-header h3 {
+      font-size: 15px;
+    }
+    
+    .add-story-btn {
+      padding: 5px 10px;
+      font-size: 11px;
+    }
+    
+    .story-item {
+      width: 55px;
+    }
+    
+    .story-avatar {
+      width: 55px;
+      height: 55px;
+    }
+    
+    .post-card {
+      margin-bottom: 16px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+  <section class="home-hero">
+    <div>
+      <div class="section-kicker">Community care</div>
+      <h1>Share, heal, and find your circle.</h1>
+      <p>Anonymous posts, counseling, communities, and chat support in one place.</p>
+      <div class="hero-actions">
+        {% if user.is_authenticated %}
+          <button class="modal-btn hero-btn" onclick="openPostModal()">Create post</button>
+          <a href="{% url 'counseling:list' %}" class="hero-link">Find support</a>
+        {% else %}
+          <a href="{% url 'accounts:register' %}" class="modal-btn hero-btn">Join now</a>
+          <a href="{% url 'accounts:login' %}" class="hero-link">Sign in</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="hero-panel">
+      <span class="panel-label">Today in Unfold</span>
+      <div class="metric-row">
+        <div class="metric-pill"><strong>{{ posts|length }}</strong><span>fresh posts</span></div>
+        <div class="metric-pill"><strong>{{ active_stories|length }}</strong><span>active stories</span></div>
+        <div class="metric-pill"><strong>24/7</strong><span>chat support</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stories Section -->
+  <div class="stories-section">
+    <div class="stories-header">
+      <h3>Stories</h3>
+      {% if user.is_authenticated %}
+      <button class="add-story-btn" onclick="openStoryModal()">
+        <span>Add Story</span>
+        <span>+</span>
+      </button>
+      {% endif %}
+    </div>
+    <div class="stories-scroll">
+      {% if user.is_authenticated %}
+      <div class="story-item">
+        <a href="{% url 'stories:story_create' %}" style="text-decoration: none; color: inherit;">
+          <div class="story-avatar" style="background: var(--header-gradient); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">
+            {% if user.profile and user.profile.image %}
+              <img src="{{ user.profile.image.url }}" alt="Your Story">
+            {% else %}
+              <div style="width: 100%; height: 100%; border-radius: 50%; background: #e4e6eb; display: flex; align-items: center; justify-content: center; color: #999; font-size: 20px;">+</div>
+            {% endif %}
+          </div>
+          <div class="story-username">Your Story</div>
+        </a>
+      </div>
+      {% endif %}
+      
+      {% for story in active_stories|slice:":8" %}
+      <div class="story-item">
+        <a href="{% url 'stories:story_detail' story.id %}" style="text-decoration: none; color: inherit;">
+          <div class="story-avatar">
+            {% if story.is_anonymous %}
+              <div class="avatar-initial">{{ story.display_initial }}</div>
+            {% elif story.user.profile and story.user.profile.image %}
+              <img src="{{ story.user.profile.image.url }}" alt="{{ story.user.username }}">
+            {% else %}
+              <div class="avatar-initial">{{ story.user.username|first|upper }}</div>
+            {% endif %}
+          </div>
+          <div class="story-username">{{ story.display_name|truncatechars:10 }}</div>
+        </a>
+      </div>
+      {% endfor %}
+      
+      {% if not active_stories %}
+      <div class="empty-inline">No active stories yet.</div>
+      {% endif %}
+    </div>
+    <div class="stories-hint">Tap a story to view &middot; Autoplays with progress</div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+    <!-- Posts Feed -->
+    <div class="posts-feed">
+      {% if user.is_authenticated %}
+      <div class="post-card composer-card" style="padding: 20px; text-align: center; cursor: pointer;" onclick="openPostModal()">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--text-light);">
+          <span style="font-weight: 600; font-size: 16px;">Create a new post</span>
+        </div>
+      </div>
+      {% endif %}
+      
+      {% for post in posts %}
+      <div class="post-card" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
+        <div class="post-header">
+          {% if post.is_anonymous %}
+            <div class="post-avatar" style="background: linear-gradient(135deg, #F88379, #F4A6B5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px; border: 2px solid #f0f0f0;">
+              {% if post.pseudonym %}
+                {{ post.pseudonym|first|upper }}
+              {% else %}
+                A
+              {% endif %}
+            </div>
+          {% else %}
+            {% if post.author.profile and post.author.profile.image %}
+              <img src="{{ post.author.profile.image.url }}" alt="{{ post.author.username }}" class="post-avatar">
+            {% else %}
+              <div class="post-avatar avatar-initial">{{ post.author.username|first|upper }}</div>
+            {% endif %}
+          {% endif %}
+          <div class="post-user-info">
+            <div class="post-username">
+              {% if post.is_anonymous %}
+                {% if post.pseudonym %}
+                  {{ post.pseudonym }}
+                {% else %}
+                  Anonymous
+                {% endif %}
+              {% else %}
+                {{ post.author.username }}
+              {% endif %}
+            </div>
+            <div class="post-time">{{ post.created_at|timesince }} ago</div>
+          </div>
+        </div>
+        
+        {% with images=post.carousel_images.all %}
+          {% if images %}
+            <div class="post-carousel" data-carousel>
+              <div class="post-carousel-track">
+                {% for item in images %}
+                  <img src="{{ item.image.url }}" alt="Post image {{ forloop.counter }}" class="post-image carousel-slide {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.counter0 }}" data-lightbox-src="{{ item.image.url }}">
+                {% endfor %}
+              </div>
+              {% if images|length > 1 %}
+                <button type="button" class="carousel-nav prev" data-carousel-prev aria-label="Previous photo"><i class="fa-solid fa-chevron-left"></i></button>
+                <button type="button" class="carousel-nav next" data-carousel-next aria-label="Next photo"><i class="fa-solid fa-chevron-right"></i></button>
+                <span class="carousel-count"><span data-carousel-index>1</span>/{{ images|length }}</span>
+                <div class="carousel-dots">
+                  {% for item in images %}
+                    <button type="button" class="carousel-dot {% if forloop.first %}active{% endif %}" data-carousel-dot="{{ forloop.counter0 }}" aria-label="Go to photo {{ forloop.counter }}"></button>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% elif post.image %}
+            <img src="{{ post.image.url }}" alt="Post image" class="post-image" data-lightbox-src="{{ post.image.url }}">
+          {% endif %}
+        {% endwith %}
+        
+        <div class="post-actions">
+          <button class="post-action like-btn {% if post.id in liked_post_ids %}liked{% endif %}" data-post-id="{{ post.id }}" data-action="like" title="Like" aria-label="Like post">
+            <i class="fa-{% if post.id in liked_post_ids %}solid{% else %}regular{% endif %} fa-heart"></i>
+          </button>
+          <button class="post-action comment-btn" data-post-id="{{ post.id }}" data-action="comment" title="Comment" aria-label="Comment">
+            <i class="fa-regular fa-comment"></i>
+          </button>
+          <a class="post-action" href="{% url 'stories:post_detail' post.id %}" title="Open post" aria-label="Open post">
+            <i class="fa-regular fa-eye"></i>
+          </a>
+          <button class="post-action share-btn" data-post-id="{{ post.id }}" data-action="share" title="Share" aria-label="Share post">
+            <i class="fa-regular fa-paper-plane"></i>
+          </button>
+          <button class="post-action save {% if post.id in saved_post_ids %}saved{% endif %}" data-post-id="{{ post.id }}" data-action="save" title="Save" aria-label="Save post">
+            <i class="fa-{% if post.id in saved_post_ids %}solid{% else %}regular{% endif %} fa-bookmark"></i>
+          </button>
+          {% if user.is_authenticated %}
+          <a class="post-action report" href="{% url 'moderation:create_report' 'stories' 'post' post.id %}?next={{ request.path }}" title="Report" aria-label="Report post">
+            <i class="fa-regular fa-flag"></i>
+          </a>
+          {% endif %}
+        </div>
+        
+        <div class="post-likes">
+          <span id="like-count-{{ post.id }}">{{ post.like_set.count }}</span> likes
+        </div>
+        
+        {% if post.content %}
+        <div class="post-caption">
+          <strong>
+            {% if post.is_anonymous %}
+              {% if post.pseudonym %}
+                {{ post.pseudonym }}
+              {% else %}
+                Anonymous
+              {% endif %}
+            {% else %}
+              {{ post.author.username }}
+            {% endif %}
+          </strong>
+          {{ post.content }}
+        </div>
+        {% endif %}
+
+        {% if post.allow_comments %}
+        <div class="post-comments-preview" id="comments-preview-{{ post.id }}">
+          {% with comments=post.comment_set.all %}
+            {% if comments %}
+              <button class="view-comments-btn" data-post-id="{{ post.id }}" data-action="comment">
+                View all {{ comments|length }} comment{{ comments|length|pluralize }}
+              </button>
+              {% for comment in comments|slice:":2" %}
+                {% include "stories/partials/comment.html" %}
+              {% endfor %}
+            {% else %}
+              <span class="comment-empty-note" id="comment-empty-{{ post.id }}">No comments yet.</span>
+            {% endif %}
+          {% endwith %}
+        </div>
+        {% endif %}
+        
+        <div class="post-time-bottom">{{ post.created_at|timesince|upper }} AGO</div>
+        
+        {% if post.allow_comments %}
+        <div class="post-comment-form">
+          <input type="text" placeholder="Add a comment..." class="post-comment-input" data-post-id="{{ post.id }}" data-action="comment-input">
+          <button class="post-comment-btn" id="comment-btn-{{ post.id }}" data-post-id="{{ post.id }}" data-action="quick-comment" disabled>Post</button>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div class="post-card feed-empty-state">
+        <span class="empty-eyebrow">Feed</span>
+        <h3>Start the first conversation.</h3>
+        <p>No posts are live yet. Share a thought, resource, or anonymous update to open the feed.</p>
+        {% if user.is_authenticated %}
+        <button class="modal-btn" onclick="openPostModal()">Create first post</button>
+        {% else %}
+        <a href="{% url 'accounts:login' %}" class="modal-btn">Login to post</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Right Sidebar -->
+    <div class="right-sidebar">
+      <div class="sidebar-card search-card">
+        <h6>Search Unfold</h6>
+        <form method="get" action="{% url 'home' %}" class="feed-search-form">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="search" name="q" value="{{ query }}" placeholder="Search posts or people">
+          <button type="submit">Search</button>
+        </form>
+        {% if query %}
+        <a class="clear-search" href="{% url 'home' %}">Clear search</a>
+        {% endif %}
+      </div>
+
+      <div class="sidebar-card">
+        <h6>Need Support?</h6>
+        <p>Talk to the AI or book a confidential session.</p>
+        <a href="{% url 'chatbot:chat' %}" class="sidebar-btn">AI Chatbot</a>
+        <a href="{% url 'counseling:list' %}" class="sidebar-btn outline">Counseling</a>
+      </div>
+      
+      <div class="sidebar-card">
+        <h6>Recommended</h6>
+        <p>Join communities, share safely, and save posts you want to revisit.</p>
+        <a href="{% url 'community:list' %}" class="sidebar-btn outline">Explore groups</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Post Modal -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal-content social-composer-modal">
+    <div class="modal-header social-composer-header">
+      <div>
+        <span class="empty-eyebrow">New post</span>
+        <h3>Create a post</h3>
+      </div>
+      <button class="modal-close" type="button" onclick="closePostModal()" aria-label="Close">&times;</button>
+    </div>
+    <form id="postForm" method="post" action="{% url 'stories:post_create' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="composer-author-row">
+        {% if user.profile and user.profile.image %}
+          <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="composer-avatar">
+        {% else %}
+          <span class="composer-avatar avatar-initial">{{ user.username|first|upper }}</span>
+        {% endif %}
+        <div>
+          <strong>{{ user.get_full_name|default:user.username }}</strong>
+          <span>Share with the Unfold community</span>
+        </div>
+      </div>
+      <div class="modal-form-group">
+        <textarea name="content" class="modal-form-control composer-textarea" rows="5" placeholder="What's unfolding today?"></textarea>
+      </div>
+      <div class="composer-upload-grid">
+        <label class="composer-upload-tile" id="postDropZone">
+          <i class="fa-regular fa-image"></i>
+          <span>Add photos</span>
+          <small>Drag photos here or browse</small>
+          <input type="file" id="postImagesInput" name="images" accept="image/*" multiple onchange="previewPostImages(this)">
+        </label>
+        <label class="composer-upload-tile">
+          <i class="fa-solid fa-paperclip"></i>
+          <span>Attach file</span>
+          <input type="file" name="file">
+        </label>
+      </div>
+      <div id="postImagePreview" class="image-preview composer-preview composer-preview-wrap carousel-preview-grid" style="display: none;"></div>
+      <div class="composer-options">
+        <label class="modal-checkbox">
+          <input type="checkbox" name="is_anonymous" id="postAnon" onchange="togglePseudonymField()">
+          <span>Post anonymously</span>
+        </label>
+        <label class="modal-checkbox">
+          <input type="checkbox" name="allow_comments" id="postAllowComments" checked>
+          <span>Allow comments</span>
+        </label>
+      </div>
+      <div class="modal-form-group" id="pseudonymGroup" style="display: none;">
+        <label class="modal-form-label">Anonymous display name</label>
+        <input type="text" name="pseudonym" id="postPseudonym" class="modal-form-control" placeholder="Leave blank for Anonymous" maxlength="80">
+      </div>
+      <div class="composer-submit-row">
+        <span id="postComposerStatus">Your post will appear in the feed after publishing.</span>
+        <button type="submit" class="modal-btn" id="postPublishBtn">Publish</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Create Story Modal -->
+<div class="modal-overlay" id="storyModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Create a Story</h3>
+      <button class="modal-close" onclick="closeStoryModal()">&times;</button>
+    </div>
+    <form id="storyForm" method="post" action="{% url 'stories:story_create' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="modal-form-group">
+        <textarea name="content" class="modal-form-control" rows="4" placeholder="Share your story..."></textarea>
+      </div>
+      <div class="modal-form-group">
+        <label class="modal-form-label">Image</label>
+        <input type="file" name="image" accept="image/*" class="modal-form-control" onchange="previewStoryImage(this)">
+        <div id="storyImagePreview" class="image-preview" style="display: none;"></div>
+      </div>
+      <div class="modal-form-group">
+        <label class="modal-form-label">Video</label>
+        <input type="file" name="video" accept="video/*" class="modal-form-control">
+      </div>
+      <div class="story-privacy-card">
+        <label class="modal-checkbox">
+          <input type="checkbox" name="is_anonymous" id="storyAnon" onchange="toggleStoryPseudonymField()">
+          <span>Share without revealing my account</span>
+        </label>
+        <div class="modal-form-group" id="storyPseudonymGroup" style="display:none;">
+          <label class="modal-form-label">Anonymous display name</label>
+          <input type="text" name="pseudonym" id="storyPseudonym" class="modal-form-control" placeholder="Leave blank for Anonymous" maxlength="80">
+        </div>
+      </div>
+      <button type="submit" class="modal-btn">Share Story</button>
+    </form>
+  </div>
+</div>
+
+<!-- Comment Modal -->
+<div class="modal-overlay" id="commentModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Comments</h3>
+      <button class="modal-close" onclick="closeCommentModal()">&times;</button>
+    </div>
+    <div id="commentsList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+    <div class="post-comment-form" style="border-top: 1px solid #f0f0f0; padding-top: 16px;">
+      <input type="text" placeholder="Add a comment..." class="post-comment-input" id="modalCommentInput" onkeyup="handleModalCommentInput()">
+      <button class="post-comment-btn" id="modalCommentBtn" onclick="addComment()" disabled>Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- Media Lightbox -->
+<div class="media-lightbox" id="mediaLightbox" aria-hidden="true">
+  <button type="button" class="media-lightbox-close" onclick="closeMediaLightbox()" aria-label="Close photo">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+  <img src="" alt="Expanded post media" id="mediaLightboxImage">
+</div>
+
+<!-- Share Modal -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Share</h3>
+      <button class="modal-close" onclick="closeShareModal()">&times;</button>
+    </div>
+    <div class="share-option" onclick="copyLink()" style="padding: 16px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: background 0.2s ease; border: 2px solid #f0f0f0;">
+      <strong style="font-size: 16px; color: var(--text);">Copy Link</strong>
+    </div>
+    <div class="share-option" onclick="shareToGroup()" style="padding: 16px; border-radius: 12px; cursor: pointer; transition: background 0.2s ease; border: 2px solid #f0f0f0;">
+      <strong style="font-size: 16px; color: var(--text);">Share to Group</strong>
+    </div>
+  </div>
+</div>
+
+<script>
+// Modal functions
+function openPostModal() {
+  document.getElementById('postModal').classList.add('active');
+}
+
+function closePostModal() {
+  document.getElementById('postModal').classList.remove('active');
+  document.getElementById('postForm').reset();
+  removePostImages();
+  document.getElementById('pseudonymGroup').style.display = 'none';
+  document.getElementById('postAnon').checked = false;
+}
+
+function togglePseudonymField() {
+  const anonCheckbox = document.getElementById('postAnon');
+  const pseudonymGroup = document.getElementById('pseudonymGroup');
+  const pseudonymInput = document.getElementById('postPseudonym');
+  
+  if (anonCheckbox.checked) {
+    pseudonymGroup.style.display = 'block';
+    pseudonymInput.placeholder = 'Enter a name to display (leave blank for "Anonymous")';
+  } else {
+    pseudonymGroup.style.display = 'none';
+    pseudonymInput.value = '';
+  }
+}
+
+function openStoryModal() {
+  document.getElementById('storyModal').classList.add('active');
+}
+
+function closeStoryModal() {
+  document.getElementById('storyModal').classList.remove('active');
+  document.getElementById('storyForm').reset();
+  document.getElementById('storyImagePreview').style.display = 'none';
+  document.getElementById('storyPseudonymGroup').style.display = 'none';
+}
+
+function toggleStoryPseudonymField() {
+  const anon = document.getElementById('storyAnon');
+  const group = document.getElementById('storyPseudonymGroup');
+  const input = document.getElementById('storyPseudonym');
+  group.style.display = anon.checked ? 'block' : 'none';
+  if (!anon.checked && input) input.value = '';
+}
+
+let modalComposerManager = null;
+
+function previewPostImages(input) {
+  modalComposerManager?.setFiles(input.files);
+}
+
+function removePostImages() {
+  modalComposerManager?.clear();
+}
+
+function previewStoryImage(input) {
+  const preview = document.getElementById('storyImagePreview');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function toggleLike(postId) {
+  const btn = document.querySelector(`.like-btn[data-post-id="${postId}"]`);
+  const countEl = document.getElementById(`like-count-${postId}`);
+  if (!btn || btn.dataset.loading === 'true') return;
+
+  const wasLiked = btn.classList.contains('liked');
+  const currentCount = parseInt(countEl?.textContent || '0', 10);
+  const icon = btn.querySelector('i');
+  btn.dataset.loading = 'true';
+  btn.classList.toggle('liked', !wasLiked);
+  if (icon) icon.className = wasLiked ? 'fa-regular fa-heart' : 'fa-solid fa-heart';
+  if (countEl) countEl.textContent = Math.max(0, currentCount + (wasLiked ? -1 : 1));
+
+  fetch('/stories/like/' + postId + '/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Like request failed');
+    return response.json();
+  })
+  .then(data => {
+    btn?.classList.toggle('liked', data.liked);
+    if (icon) {
+      icon.className = data.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+    }
+    if (countEl) countEl.textContent = data.likes_count;
+  })
+  .catch(err => {
+    btn.classList.toggle('liked', wasLiked);
+    if (icon) icon.className = wasLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+    if (countEl) countEl.textContent = currentCount;
+    showFeedToast('Could not update like');
+    console.error('Like error:', err);
+  })
+  .finally(() => {
+    btn.dataset.loading = 'false';
+  });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function toggleSave(postId) {
+  const btn = document.querySelector(`.save[data-post-id="${postId}"]`);
+  if (!btn || btn.dataset.loading === 'true') return;
+
+  const wasSaved = btn.classList.contains('saved');
+  const icon = btn.querySelector('i');
+  btn.dataset.loading = 'true';
+  btn.classList.toggle('saved', !wasSaved);
+  if (icon) icon.className = wasSaved ? 'fa-regular fa-bookmark' : 'fa-solid fa-bookmark';
+
+  fetch('/stories/save/' + postId + '/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Save request failed');
+    return response.json();
+  })
+  .then(data => {
+    btn?.classList.toggle('saved', data.saved);
+    if (icon) {
+      icon.className = data.saved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
+    }
+  })
+  .catch(err => {
+    btn.classList.toggle('saved', wasSaved);
+    if (icon) icon.className = wasSaved ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
+    showFeedToast('Could not update saved post');
+    console.error('Save error:', err);
+  })
+  .finally(() => {
+    btn.dataset.loading = 'false';
+  });
+}
+
+// Comment functions
+let currentPostId = null;
+
+function openCommentModal(postId) {
+  currentPostId = postId;
+  const modal = document.getElementById('commentModal');
+  const list = document.getElementById('commentsList');
+  const preview = document.getElementById(`comments-preview-${postId}`);
+  const comments = preview ? Array.from(preview.querySelectorAll('.feed-comment')).map(comment => comment.outerHTML).join('') : '';
+  list.innerHTML = comments || '<p class="comments-empty-modal">No comments yet. Start the conversation.</p>';
+  modal.classList.add('active');
+  document.getElementById('modalCommentInput').focus();
+}
+
+function closeCommentModal() {
+  document.getElementById('commentModal').classList.remove('active');
+  document.getElementById('modalCommentInput').value = '';
+  document.getElementById('modalCommentBtn').disabled = true;
+}
+
+function handleModalCommentInput() {
+  const input = document.getElementById('modalCommentInput');
+  const btn = document.getElementById('modalCommentBtn');
+  btn.disabled = !input.value.trim();
+  if (input.value.trim()) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+}
+
+function postComment(postId, text) {
+  const formData = new FormData();
+  formData.append('text', text);
+
+  return fetch('/stories/comment/' + postId + '/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: formData
+  }).then(response => {
+    if (!response.ok) throw new Error('Comment request failed');
+    return response.json();
+  });
+}
+
+function insertComment(postId, html, commentCount) {
+  const preview = document.getElementById(`comments-preview-${postId}`);
+  if (!preview || !html) return;
+
+  const empty = document.getElementById(`comment-empty-${postId}`);
+  if (empty) empty.remove();
+
+  let viewButton = preview.querySelector('.view-comments-btn');
+  if (!viewButton) {
+    viewButton = document.createElement('button');
+    viewButton.type = 'button';
+    viewButton.className = 'view-comments-btn';
+    viewButton.dataset.postId = String(postId);
+    viewButton.dataset.action = 'comment';
+    preview.prepend(viewButton);
+  }
+  viewButton.textContent = `View all ${commentCount} comment${commentCount === 1 ? '' : 's'}`;
+  viewButton.insertAdjacentHTML('afterend', html);
+
+  const comments = preview.querySelectorAll('.feed-comment');
+  comments.forEach((comment, index) => {
+    if (index > 1) comment.remove();
+  });
+
+  const list = document.getElementById('commentsList');
+  if (currentPostId === postId && list) {
+    const modalEmpty = list.querySelector('.comments-empty-modal');
+    if (modalEmpty) modalEmpty.remove();
+    list.insertAdjacentHTML('afterbegin', html);
+  }
+}
+
+function addComment() {
+  const input = document.getElementById('modalCommentInput');
+  const text = input.value.trim();
+  if (!text || !currentPostId) return;
+
+  postComment(currentPostId, text)
+    .then((data) => {
+      input.value = '';
+      document.getElementById('modalCommentBtn').disabled = true;
+      document.getElementById('modalCommentBtn').classList.remove('active');
+      insertComment(currentPostId, data.html, data.comment_count);
+      showFeedToast('Comment posted');
+    })
+    .catch(err => {
+      showFeedToast('Could not post comment');
+      console.error('Comment error:', err);
+    });
+}
+
+function addQuickComment(postId) {
+  const input = document.querySelector(`.post-comment-input[data-post-id="${postId}"]`);
+  const text = input.value.trim();
+  if (!text) return;
+
+  postComment(postId, text)
+    .then((data) => {
+      input.value = '';
+      const button = document.getElementById(`comment-btn-${postId}`);
+      button.disabled = true;
+      button.classList.remove('active');
+      insertComment(postId, data.html, data.comment_count);
+      showFeedToast('Comment posted');
+    })
+    .catch(err => {
+      showFeedToast('Could not post comment');
+      console.error('Comment error:', err);
+    });
+}
+
+function handleCommentInput(input, postId) {
+  const btn = document.getElementById(`comment-btn-${postId}`);
+  btn.disabled = !input.value.trim();
+  if (input.value.trim()) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+}
+
+// Share functions
+function openShareModal(postId) {
+  const url = window.location.origin + window.location.pathname + '#post-' + postId;
+  navigator.clipboard?.writeText(url).then(() => {
+    showFeedToast('Post link copied');
+  }).catch(() => {
+    document.getElementById('shareModal').classList.add('active');
+  });
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('active');
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href);
+  alert('Link copied to clipboard!');
+  closeShareModal();
+}
+
+function shareToGroup() {
+  alert('Share to group feature coming soon!');
+  closeShareModal();
+}
+
+function showFeedToast(message) {
+  let toast = document.querySelector('.feed-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'feed-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function openMediaLightbox(src) {
+  const lightbox = document.getElementById('mediaLightbox');
+  const image = document.getElementById('mediaLightboxImage');
+  if (!lightbox || !image || !src) return;
+  image.src = src;
+  lightbox.classList.add('active');
+  lightbox.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('lightbox-open');
+}
+
+function closeMediaLightbox() {
+  const lightbox = document.getElementById('mediaLightbox');
+  const image = document.getElementById('mediaLightboxImage');
+  if (!lightbox || !image) return;
+  lightbox.classList.remove('active');
+  lightbox.setAttribute('aria-hidden', 'true');
+  image.src = '';
+  document.body.classList.remove('lightbox-open');
+}
+
+function createPhotoComposerManager({ inputId, previewId, dropZoneId, statusId }) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  const dropZone = document.getElementById(dropZoneId);
+  const status = document.getElementById(statusId);
+  let files = [];
+
+  function syncInput() {
+    if (!input) return;
+    const transfer = new DataTransfer();
+    files.forEach(file => transfer.items.add(file));
+    input.files = transfer.files;
+  }
+
+  function updateStatus() {
+    if (!status) return;
+    if (!files.length) {
+      status.textContent = 'Your post will appear in the feed after publishing.';
+      return;
+    }
+    status.textContent = `${files.length} photo${files.length === 1 ? '' : 's'} selected. Use arrows to reorder.`;
+  }
+
+  function render() {
+    if (!preview) return;
+    preview.innerHTML = '';
+    if (!files.length) {
+      preview.style.display = 'none';
+      updateStatus();
+      return;
+    }
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'composer-preview-toolbar';
+    toolbar.innerHTML = `<strong>${files.length} photo${files.length === 1 ? '' : 's'} selected</strong><button type="button">Clear all</button>`;
+    toolbar.querySelector('button').addEventListener('click', clear);
+    preview.appendChild(toolbar);
+
+    files.forEach((file, index) => {
+      const item = document.createElement('div');
+      item.className = 'carousel-preview-item composer-sortable-item';
+      item.draggable = true;
+      item.dataset.index = String(index);
+
+      const reader = new FileReader();
+      reader.onload = event => {
+        item.innerHTML = `
+          <img src="${event.target.result}" alt="Selected post image ${index + 1}">
+          <div class="composer-image-actions">
+            <button type="button" data-move="-1" aria-label="Move photo left"><i class="fa-solid fa-arrow-left"></i></button>
+            <button type="button" data-move="1" aria-label="Move photo right"><i class="fa-solid fa-arrow-right"></i></button>
+            <button type="button" data-remove aria-label="Remove photo"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <span class="composer-image-order">${index + 1}</span>
+        `;
+      };
+      reader.readAsDataURL(file);
+      preview.appendChild(item);
+    });
+
+    preview.style.display = 'grid';
+    updateStatus();
+  }
+
+  function setFiles(fileList) {
+    const nextFiles = Array.from(fileList || []).filter(file => file.type.startsWith('image/')).slice(0, 10);
+    files = nextFiles;
+    syncInput();
+    render();
+  }
+
+  function clear() {
+    files = [];
+    if (input) input.value = '';
+    syncInput();
+    render();
+  }
+
+  function move(from, to) {
+    if (to < 0 || to >= files.length) return;
+    const [file] = files.splice(from, 1);
+    files.splice(to, 0, file);
+    syncInput();
+    render();
+  }
+
+  function remove(index) {
+    files.splice(index, 1);
+    syncInput();
+    render();
+  }
+
+  preview?.addEventListener('click', event => {
+    const item = event.target.closest('.composer-sortable-item');
+    if (!item) return;
+    const index = parseInt(item.dataset.index, 10);
+    const removeButton = event.target.closest('[data-remove]');
+    const moveButton = event.target.closest('[data-move]');
+    if (removeButton) remove(index);
+    if (moveButton) move(index, index + parseInt(moveButton.dataset.move, 10));
+  });
+
+  let dragIndex = null;
+  preview?.addEventListener('dragstart', event => {
+    const item = event.target.closest('.composer-sortable-item');
+    if (!item) return;
+    dragIndex = parseInt(item.dataset.index, 10);
+    item.classList.add('dragging');
+  });
+  preview?.addEventListener('dragend', event => {
+    event.target.closest('.composer-sortable-item')?.classList.remove('dragging');
+    dragIndex = null;
+  });
+  preview?.addEventListener('dragover', event => {
+    if (dragIndex === null) return;
+    event.preventDefault();
+  });
+  preview?.addEventListener('drop', event => {
+    const item = event.target.closest('.composer-sortable-item');
+    if (!item || dragIndex === null) return;
+    event.preventDefault();
+    move(dragIndex, parseInt(item.dataset.index, 10));
+  });
+
+  ['dragenter', 'dragover'].forEach(type => {
+    dropZone?.addEventListener(type, event => {
+      event.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(type => {
+    dropZone?.addEventListener(type, () => dropZone.classList.remove('drag-over'));
+  });
+  dropZone?.addEventListener('drop', event => {
+    event.preventDefault();
+    setFiles(event.dataTransfer.files);
+  });
+
+  return { setFiles, clear };
+}
+
+// Close modals on outside click
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('active');
+  }
+});
+
+// Event delegation for post actions
+document.addEventListener('DOMContentLoaded', function() {
+  modalComposerManager = createPhotoComposerManager({
+    inputId: 'postImagesInput',
+    previewId: 'postImagePreview',
+    dropZoneId: 'postDropZone',
+    statusId: 'postComposerStatus'
+  });
+
+  document.getElementById('postForm')?.addEventListener('submit', function() {
+    const button = document.getElementById('postPublishBtn');
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Publishing...';
+    }
+  });
+
+  document.querySelectorAll('[data-carousel]').forEach(carousel => {
+    let index = 0;
+    const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
+    const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
+    const count = carousel.querySelector('[data-carousel-index]');
+
+    function showSlide(nextIndex) {
+      if (!slides.length) return;
+      index = (nextIndex + slides.length) % slides.length;
+      slides.forEach((slide, slideIndex) => slide.classList.toggle('active', slideIndex === index));
+      dots.forEach((dot, dotIndex) => dot.classList.toggle('active', dotIndex === index));
+      if (count) count.textContent = String(index + 1);
+    }
+
+    carousel.querySelector('[data-carousel-prev]')?.addEventListener('click', event => {
+      event.stopPropagation();
+      showSlide(index - 1);
+    });
+    carousel.querySelector('[data-carousel-next]')?.addEventListener('click', event => {
+      event.stopPropagation();
+      showSlide(index + 1);
+    });
+    dots.forEach(dot => {
+      dot.addEventListener('click', event => {
+        event.stopPropagation();
+        showSlide(parseInt(dot.dataset.carouselDot, 10));
+      });
+    });
+  });
+
+  document.addEventListener('click', function(e) {
+    const media = e.target.closest('[data-lightbox-src]');
+    if (!media) return;
+    openMediaLightbox(media.getAttribute('data-lightbox-src'));
+  });
+
+  document.getElementById('mediaLightbox')?.addEventListener('click', function(e) {
+    if (e.target.id === 'mediaLightbox') closeMediaLightbox();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeMediaLightbox();
+      closeCommentModal();
+      closeShareModal();
+    }
+  });
+
+  // Handle post action buttons (like, comment, share, save)
+  document.addEventListener('click', function(e) {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    
+    const postId = parseInt(action.getAttribute('data-post-id'));
+    const actionType = action.getAttribute('data-action');
+    
+    if (!postId) return;
+    
+    switch(actionType) {
+      case 'like':
+        toggleLike(postId);
+        break;
+      case 'comment':
+        openCommentModal(postId);
+        break;
+      case 'share':
+        openShareModal(postId);
+        break;
+      case 'save':
+        toggleSave(postId);
+        break;
+      case 'quick-comment':
+        addQuickComment(postId);
+        break;
+    }
+  });
+  
+  // Handle comment input fields
+  document.addEventListener('keyup', function(e) {
+    if (e.target.classList.contains('post-comment-input') && e.target.hasAttribute('data-action')) {
+      const postId = parseInt(e.target.getAttribute('data-post-id'));
+      if (postId) {
+        handleCommentInput(e.target, postId);
+      }
+    }
+  });
+  
+  // Handle Enter key on comment inputs
+  document.addEventListener('keypress', function(e) {
+    if (e.target.classList.contains('post-comment-input') && e.target.hasAttribute('data-action') && e.key === 'Enter') {
+      const postId = parseInt(e.target.getAttribute('data-post-id'));
+      const btn = document.getElementById('comment-btn-' + postId);
+      if (postId && btn && !btn.disabled) {
+        addQuickComment(postId);
+      }
+    }
+  });
+});
+</script>
+{% endblock %}
+
+

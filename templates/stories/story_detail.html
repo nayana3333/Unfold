@@ -1,0 +1,102 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ story.display_name }}'s Story - Unfold{% endblock %}
+
+{% block content %}
+<main class="story-viewer-shell">
+  <section class="story-viewer">
+    <div class="story-progress"><span id="storyProgress"></span></div>
+
+    <header class="story-viewer-header">
+      <div class="story-owner">
+        {% if story.is_anonymous %}
+          <span>{{ story.display_initial }}</span>
+        {% elif story.user.profile and story.user.profile.image %}
+          <img src="{{ story.user.profile.image.url }}" alt="{{ story.user.username }}">
+        {% else %}
+          <span>{{ story.user.username|first|upper }}</span>
+        {% endif %}
+        <div>
+          <strong>{{ story.display_name }}</strong>
+          <small>{{ story.created_at|timesince }} ago</small>
+        </div>
+      </div>
+      <a href="{% url 'home' %}" class="story-close-btn" aria-label="Close story">
+        <i class="fa-solid fa-xmark"></i>
+      </a>
+    </header>
+
+    <div class="story-stage">
+      {% if story.story_type == 'image' and story.image %}
+        <img src="{{ story.image.url }}" alt="Story image" class="story-stage-media">
+      {% elif story.story_type == 'video' and story.video %}
+        <video src="{{ story.video.url }}" class="story-stage-media" controls autoplay playsinline></video>
+      {% else %}
+        <div class="story-text-card">
+          {{ story.content|default:"A quiet Unfold moment."|linebreaksbr }}
+        </div>
+      {% endif %}
+    </div>
+
+    <nav class="story-viewer-nav" aria-label="Story navigation">
+      {% if prev_story %}
+        <a href="{% url 'stories:story_detail' prev_story.id %}" class="story-nav-btn prev" aria-label="Previous story">
+          <i class="fa-solid fa-chevron-left"></i>
+        </a>
+      {% else %}
+        <span></span>
+      {% endif %}
+
+      {% if next_story %}
+        <a href="{% url 'stories:story_detail' next_story.id %}" class="story-nav-btn next" aria-label="Next story">
+          <i class="fa-solid fa-chevron-right"></i>
+        </a>
+      {% else %}
+        <a href="{% url 'home' %}" class="story-nav-btn next" aria-label="Back to feed">
+          <i class="fa-solid fa-house"></i>
+        </a>
+      {% endif %}
+    </nav>
+  </section>
+</main>
+
+<div id="story-nav-data"
+     data-prev-url="{% if prev_story %}{% url 'stories:story_detail' prev_story.id %}{% endif %}"
+     data-next-url="{% if next_story %}{% url 'stories:story_detail' next_story.id %}{% else %}{% url 'home' %}{% endif %}"
+     data-feed-url="{% url 'home' %}">
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+  const progress = document.getElementById('storyProgress');
+  const navData = document.getElementById('story-nav-data');
+  const nextUrl = navData.dataset.nextUrl;
+  const prevUrl = navData.dataset.prevUrl;
+  const feedUrl = navData.dataset.feedUrl;
+  let start = performance.now();
+  const duration = 7000;
+
+  function tick(now) {
+    const pct = Math.min(((now - start) / duration) * 100, 100);
+    progress.style.width = pct + '%';
+    if (pct < 100) {
+      requestAnimationFrame(tick);
+    } else if (nextUrl) {
+      window.location.href = nextUrl;
+    }
+  }
+
+  requestAnimationFrame(tick);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'ArrowLeft' && prevUrl) window.location.href = prevUrl;
+    if (event.key === 'ArrowRight' && nextUrl) window.location.href = nextUrl;
+    if (event.key === 'Escape') window.location.href = feedUrl;
+  });
+})();
+</script>
+{% endblock %}
+

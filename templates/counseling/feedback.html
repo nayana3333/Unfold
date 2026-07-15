@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Feedback - {{ booking.psychiatrist.full_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .feedback-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  
+  .feedback-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    padding: 32px;
+  }
+  
+  .doctor-info {
+    text-align: center;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 24px;
+  }
+  
+  .stars-container {
+    text-align: center;
+    margin: 24px 0;
+  }
+  
+  .star {
+    font-size: 36px;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 4px;
+  }
+  
+  .star:hover,
+  .star.active {
+    color: #F4B400;
+    transform: scale(1.1);
+  }
+  
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+  }
+  
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 166, 181, 0.3);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="feedback-container">
+  <div class="feedback-card">
+    <div class="doctor-info">
+      <h2>Rate Your Session</h2>
+      <p class="text-muted">Dr. {{ booking.psychiatrist.full_name }}</p>
+      <p class="text-muted small">{{ booking.slot.start|date:"F d, Y" }}</p>
+    </div>
+    
+    <form method="post">
+      {% csrf_token %}
+      
+      <div class="stars-container">
+        <span class="star" data-rating="1">★</span>
+        <span class="star" data-rating="2">★</span>
+        <span class="star" data-rating="3">★</span>
+        <span class="star" data-rating="4">★</span>
+        <span class="star" data-rating="5">★</span>
+      </div>
+      <input type="hidden" name="rating" id="ratingInput" value="5" required>
+      
+      <div class="form-group mb-3">
+        <label class="form-label">Your Feedback (Optional)</label>
+        <textarea name="comment" class="form-control" rows="4" placeholder="Share your experience..."></textarea>
+      </div>
+      
+      <button type="submit" class="submit-btn">Submit Feedback</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const stars = document.querySelectorAll('.star');
+const ratingInput = document.getElementById('ratingInput');
+let selectedRating = 5;
+
+stars.forEach(star => {
+  star.addEventListener('click', function() {
+    selectedRating = parseInt(this.dataset.rating);
+    ratingInput.value = selectedRating;
+    
+    stars.forEach((s, idx) => {
+      if (idx < selectedRating) {
+        s.classList.add('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+  });
+  
+  star.addEventListener('mouseenter', function() {
+    const hoverRating = parseInt(this.dataset.rating);
+    stars.forEach((s, idx) => {
+      if (idx < hoverRating) {
+        s.style.color = '#F4B400';
+      } else {
+        s.style.color = '#ddd';
+      }
+    });
+  });
+});
+
+document.querySelector('.stars-container').addEventListener('mouseleave', function() {
+  stars.forEach((s, idx) => {
+    if (idx < selectedRating) {
+      s.style.color = '#F4B400';
+    } else {
+      s.style.color = '#ddd';
+    }
+  });
+});
+</script>
+{% endblock %}
+

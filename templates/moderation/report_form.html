@@ -1,0 +1,41 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Report Content - Unfold{% endblock %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto; padding: 32px 20px 56px;">
+  <section style="background: #fff; border: 1px solid var(--line, #e4ded7); padding: 28px;">
+    <div class="section-kicker">Trust and safety</div>
+    <h1 style="margin: 8px 0 10px;">Report content</h1>
+    <p class="text-muted" style="margin-bottom: 22px;">Use this when content feels unsafe, abusive, private, misleading, or harmful. Reports go to staff moderation.</p>
+    <div style="border: 1px solid var(--line, #e4ded7); background: var(--surface-soft, #fbf7f4); padding: 14px 16px; margin-bottom: 20px;">
+      <strong>Reporting {{ target_type }}</strong>
+      <p class="text-muted" style="margin: 6px 0 0;">{{ target|truncatechars:180 }}</p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="{{ form.reason.id_for_label }}">Reason</label>
+        {{ form.reason }}
+        {{ form.reason.errors }}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="{{ form.severity.id_for_label }}">Severity</label>
+        {{ form.severity }}
+        {{ form.severity.errors }}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="{{ form.details.id_for_label }}">Details</label>
+        {{ form.details }}
+        <p class="text-muted" style="margin-top: 6px; font-size: 0.9rem;">Add enough context for a moderator to understand what happened.</p>
+        {{ form.details.errors }}
+      </div>
+      <button type="submit" class="modal-btn">Submit report</button>
+      <a href="{{ request.GET.next|default:'/' }}" class="browse-btn" style="display:inline-block; margin-top: 10px; text-align:center;">Cancel</a>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+

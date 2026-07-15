@@ -1,0 +1,215 @@
+﻿{% extends "base.html" %}
+{% block title %}Unfold - Ask Unfold AI{% endblock %}
+
+{% block content %}
+<div class="ai-shell">
+  <aside class="ai-rail">
+    <div class="ai-rail-card ai-status-card">
+      <span class="ai-status-dot"></span>
+      <div>
+        <strong>Unfold AI</strong>
+        <small>{{ ai_provider }} mode · {{ history_count }} saved messages</small>
+      </div>
+    </div>
+
+    <div class="ai-rail-card">
+      <h2>Support modes</h2>
+      <button class="mode-card active" data-prompt="I am feeling anxious. Help me calm down with a grounding exercise.">
+        <i class="fa-solid fa-wind"></i>
+        <span>Calm anxiety</span>
+      </button>
+      <button class="mode-card" data-prompt="Help me prepare a career plan and improve my confidence for interviews.">
+        <i class="fa-solid fa-briefcase"></i>
+        <span>Career guidance</span>
+      </button>
+      <button class="mode-card" data-prompt="I need help understanding how to set a healthy boundary.">
+        <i class="fa-solid fa-shield-heart"></i>
+        <span>Boundaries</span>
+      </button>
+      <button class="mode-card" data-prompt="I want to report something unsafe. Help me organize what happened.">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Safety report</span>
+      </button>
+    </div>
+
+    <div class="ai-rail-card emergency-card">
+      <h2>Need urgent help?</h2>
+      <p>If you are in immediate danger, contact local emergency services first. Unfold AI is not emergency care.</p>
+      <a href="{% url 'counseling:list' %}">Find counseling</a>
+    </div>
+  </aside>
+
+  <section class="ai-chat-card">
+    <header class="ai-chat-header">
+      <div>
+        <div class="section-kicker">Support chat</div>
+        <h1>Ask Unfold AI</h1>
+        <p>Talk through wellness, safety, career, and community questions.</p>
+      </div>
+      <div class="ai-header-badge">
+        <i class="fa-solid fa-lock"></i>
+        <span>Private session</span>
+      </div>
+    </header>
+
+    <div class="ai-suggestions" aria-label="Quick prompts">
+      <button data-prompt="I am overwhelmed. Give me a 2-minute reset.">2-minute reset</button>
+      <button data-prompt="Help me write a message to ask for support.">Ask for support</button>
+      <button data-prompt="Help me prepare for an interview tomorrow.">Interview prep</button>
+      <button data-prompt="How do I know if a situation is unsafe?">Safety check</button>
+    </div>
+
+    <div id="chatBody" class="ai-chat-body">
+      <div class="ai-message assistant">
+        <div class="message-avatar">U</div>
+        <div class="message-bubble">
+          <p>Hi, I am here with you. Tell me what is going on, or choose a quick prompt to start. I can support you, but I cannot replace a counselor, doctor, lawyer, or emergency service.</p>
+          <small>Now</small>
+        </div>
+      </div>
+      {% for message in chat_history %}
+        <div class="ai-message {% if message.role == 'user' %}user{% else %}assistant{% endif %}">
+          {% if message.role != 'user' %}<div class="message-avatar">U</div>{% endif %}
+          <div class="message-bubble">
+            <p>{{ message.content|linebreaksbr }}</p>
+            <small>{{ message.created_at|date:"M d, H:i" }}</small>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <form id="chatForm" class="ai-composer">
+      {% csrf_token %}
+      <textarea id="chatText" rows="1" placeholder="Message Unfold AI..." autocomplete="off"></textarea>
+      <button id="sendBtn" type="submit" aria-label="Send message">
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+  const chatBody = document.getElementById('chatBody');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatText');
+  const sendBtn = document.getElementById('sendBtn');
+  let typingIndicator = null;
+
+  function csrfToken() {
+    const tokenInput = document.querySelector('input[name=csrfmiddlewaretoken]');
+    if (tokenInput) return tokenInput.value;
+    return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+      .replace(/\n/g, '<br>');
+  }
+
+  function scrollToBottom() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function addMessage(text, role, meta) {
+    const row = document.createElement('div');
+    row.className = 'ai-message ' + role;
+    row.innerHTML = (role === 'assistant' ? '<div class="message-avatar">U</div>' : '') +
+      '<div class="message-bubble"><p>' + escapeHtml(text) + '</p><small>' + (meta || 'Now') + '</small></div>';
+    chatBody.appendChild(row);
+    scrollToBottom();
+  }
+
+  function showTyping() {
+    if (typingIndicator) return;
+    typingIndicator = document.createElement('div');
+    typingIndicator.className = 'ai-message assistant typing-row';
+    typingIndicator.innerHTML = '<div class="message-avatar">U</div><div class="message-bubble typing-bubble"><span></span><span></span><span></span></div>';
+    chatBody.appendChild(typingIndicator);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    if (typingIndicator) {
+      typingIndicator.remove();
+      typingIndicator = null;
+    }
+  }
+
+  function resizeInput() {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 132) + 'px';
+  }
+
+  async function sendMessage(text) {
+    const message = (text || chatInput.value).trim();
+    if (!message) return;
+
+    addMessage(message, 'user');
+    chatInput.value = '';
+    resizeInput();
+    chatInput.disabled = true;
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      const body = new URLSearchParams();
+      body.append('text', message);
+      const response = await fetch('{% url "chatbot:chat_api" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrfToken(),
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body,
+        credentials: 'same-origin'
+      });
+      const data = await response.json();
+      hideTyping();
+      addMessage(data.answer || 'I am here. Could you share a little more?', 'assistant', data.provider || 'Now');
+    } catch (error) {
+      hideTyping();
+      addMessage('Something went wrong while sending. Please try again.', 'assistant');
+    } finally {
+      chatInput.disabled = false;
+      sendBtn.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  chatForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    sendMessage();
+  });
+
+  chatInput.addEventListener('input', resizeInput);
+  chatInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  });
+
+  document.querySelectorAll('[data-prompt]').forEach(button => {
+    button.addEventListener('click', function() {
+      document.querySelectorAll('.mode-card').forEach(item => item.classList.remove('active'));
+      if (this.classList.contains('mode-card')) this.classList.add('active');
+      sendMessage(this.dataset.prompt);
+    });
+  });
+
+  resizeInput();
+  scrollToBottom();
+  chatInput.focus();
+})();
+</script>
+{% endblock %}
+

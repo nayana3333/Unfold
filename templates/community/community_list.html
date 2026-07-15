@@ -1,0 +1,600 @@
+﻿{% extends "base.html" %}
+{% block title %}Unfold - Community{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    background: #FFF4F7;
+  }
+  
+  .community-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .community-header {
+    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .community-header h1 {
+    margin: 0;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: 0.3px;
+  }
+  
+  .community-header .tagline {
+    opacity: 0.95;
+    font-size: 15px;
+    margin-top: 8px;
+  }
+  
+  .tabs-wrap {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .tab-btn {
+    border: none;
+    background: transparent;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+  }
+  
+  .tab-btn.active {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  
+  .tab-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .group-card {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 16px;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  
+  .group-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(244, 166, 181, 0.15);
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .group-card h5 {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 18px;
+  }
+  
+  .member-avatars {
+    display: flex;
+    align-items: center;
+  }
+  
+  .avatar-female {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+    margin-right: -8px;
+  }
+  
+  .join-btn {
+    background: #F4A6B5;
+    border: none;
+    color: white;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .join-btn:hover {
+    background: #F88379;
+    color: white;
+  }
+  
+  .join-btn.joined {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .sidebar-card {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .sidebar-card h6 {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    font-size: 16px;
+  }
+  
+  .suggested-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .suggested-item:last-child {
+    border-bottom: none;
+  }
+  
+  .suggested-item .name {
+    font-weight: 700;
+    color: #333;
+    font-size: 14px;
+  }
+  
+  .suggested-item .btn {
+    background: white;
+    color: #F4A6B5;
+    border: 2px solid #F4A6B5;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .suggested-item .btn:hover {
+    background: #FFF5F9;
+    color: #F88379;
+    border-color: #F88379;
+  }
+  
+  .member-dot {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+  }
+  
+  .member-dot::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    background: #3CCB7F;
+    border: 2px solid white;
+    border-radius: 50%;
+  }
+  
+  .form-control {
+    border: 2px solid rgba(244, 166, 181, 0.3);
+    border-radius: 12px;
+    padding: 8px 12px;
+  }
+  
+  .form-control:focus {
+    border-color: #F4A6B5;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+  }
+  
+  .pill-btn {
+    background: #F4A6B5;
+    border: none;
+    color: white;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+  }
+  
+  .pill-btn:hover {
+    background: #F88379;
+  }
+  
+  .discussion-item {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+  }
+  
+  .discussion-item:hover {
+    background: #FFF5F9;
+  }
+  
+  .discussion-item:last-child {
+    border-bottom: none;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+  }
+  
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .modal-overlay.active {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #999;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .modal-close:hover {
+    background: #f0f0f0;
+    color: #333;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="community-container">
+  <div class="community-header">
+    <h1>Community</h1>
+    <div class="tagline">Connect, share, and grow together in safe Unfold communities.</div>
+    <div class="tabs-wrap">
+      <button class="tab-btn active" data-tab="all">All Groups</button>
+      <button class="tab-btn" data-tab="mine">My Groups</button>
+      {% if user.is_authenticated %}
+      <button class="tab-btn" data-tab="create">Create Group</button>
+      {% endif %}
+      <button class="tab-btn" data-tab="discuss">Discussions</button>
+    </div>
+    <div class="mt-2 small" style="opacity: 0.9; margin-top: 12px;">Explore circles, join conversations, or start your own group.</div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left: Groups Grid / Discussions -->
+    <div class="col-lg-8">
+      <!-- All Groups -->
+      <div id="tab-all" class="tab-pane">
+        <div class="row g-3">
+          {% for group in groups %}
+          <div class="col-md-6">
+            <a href="{% url 'community:group_detail' group.pk %}" class="group-card">
+              <h5>{{ group.name }}</h5>
+              <div class="text-muted mb-2" style="font-size: 14px;">{{ group.description|truncatewords:20 }}</div>
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="member-avatars">
+                    {% for member in group.members.all|slice:":3" %}
+                      {% if member.user.profile and member.user.profile.image %}
+                        <img class="avatar-female" src="{{ member.user.profile.image.url }}" alt="{{ member.user.username }}" />
+                      {% else %}
+                        <span class="avatar-female avatar-initial">{{ member.user.username|first|upper }}</span>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  <span class="small text-muted ms-2">{{ group.member_count }} members</span>
+                </div>
+                {% if user.is_authenticated %}
+                  {% if group.user_is_member %}
+                    <span class="join-btn joined">Joined</span>
+                  {% else %}
+                    <span class="join-btn" onclick="event.preventDefault(); joinGroup({{ group.pk }})">Join Group</span>
+                  {% endif %}
+                {% else %}
+                  <a href="{% url 'accounts:login' %}" class="join-btn">Login to Join</a>
+                {% endif %}
+              </div>
+            </a>
+          </div>
+          {% empty %}
+          <div class="col-12">
+            <div class="empty-state community-empty">
+              <span class="empty-eyebrow">Community</span>
+              <h3>Create the first circle.</h3>
+              <p>No groups are live yet. Start a focused space for support, learning, or shared experiences.</p>
+              {% if user.is_authenticated %}
+                <a href="{% url 'community:create_group' %}" class="pill-btn">Create group</a>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- My Groups -->
+      <div id="tab-mine" class="tab-pane d-none">
+        {% if user.is_authenticated %}
+          {% if my_groups %}
+            <div class="row g-3">
+              {% for group in my_groups %}
+              <div class="col-md-6">
+                <a href="{% url 'community:group_detail' group.pk %}" class="group-card">
+                  <h5>{{ group.name }}</h5>
+                  <div class="text-muted mb-2" style="font-size: 14px;">{{ group.description|truncatewords:20 }}</div>
+                  <div class="d-flex align-items-center justify-content-between">
+                    <span class="small text-muted">{{ group.member_count }} members</span>
+                    <span class="join-btn joined">Joined</span>
+                  </div>
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state community-empty">
+              <span class="empty-eyebrow">My groups</span>
+              <strong>You haven't joined any groups yet.</strong>
+              <p>Browse all groups to find circles that resonate with you.</p>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="empty-state">
+            <p>Please <a href="{% url 'accounts:login' %}">login</a> to view your groups.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Discussions -->
+      <div id="tab-discuss" class="tab-pane d-none">
+        {% if recent_discussions %}
+          {% for discussion in recent_discussions %}
+          <div class="discussion-item">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <strong>{{ discussion.author.username }}</strong>
+                <span class="text-muted">&middot; {{ discussion.created_at|timesince }} ago</span>
+                <div class="small text-muted">in <a href="{% url 'community:group_detail' discussion.group.pk %}" style="color: #F4A6B5;">{{ discussion.group.name }}</a></div>
+              </div>
+              {% if discussion.is_pinned %}
+              <span class="badge" style="background: #F4A6B5; color: white;">Pinned</span>
+              {% endif %}
+            </div>
+            {% if discussion.title %}
+            <h6 style="margin: 8px 0 4px; color: #333;">{{ discussion.title }}</h6>
+            {% endif %}
+            <div style="color: #666; margin-bottom: 8px;">{{ discussion.content|truncatewords:30 }}</div>
+            <div class="small text-muted">
+              <a href="{% url 'community:discussion_detail' discussion.pk %}" style="color: #F4A6B5; text-decoration: none;">
+                {{ discussion.comment_count }} replies &middot; {{ discussion.like_count }} likes
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state community-empty">
+            <span class="empty-eyebrow">Discussions</span>
+            <h3>No discussions yet.</h3>
+            <p>Join a group and start the first thoughtful thread.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Sidebar -->
+    <div class="col-lg-4">
+      {% if user.is_authenticated %}
+      <div class="sidebar-card mb-3">
+        <h6>Suggested Groups</h6>
+        {% if suggested_groups %}
+          {% for group in suggested_groups %}
+          <div class="suggested-item">
+            <span class="name">{{ group.name }}</span>
+            <form method="post" action="{% url 'community:join_group' group.pk %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn">Join</button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="small text-muted">No suggested groups at the moment.</p>
+        {% endif %}
+      </div>
+      {% endif %}
+      
+      <div class="sidebar-card">
+        <h6>Active Members</h6>
+        <div class="d-flex gap-2" style="flex-wrap: wrap;">
+          {% for group in groups|slice:":4" %}
+            {% for member in group.members.all|slice:":1" %}
+              {% if member.user.profile and member.user.profile.image %}
+                <img class="member-dot" src="{{ member.user.profile.image.url }}" alt="{{ member.user.username }}" />
+              {% else %}
+                <span class="member-dot avatar-initial">{{ member.user.username|first|upper }}</span>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Group Modal -->
+{% if user.is_authenticated %}
+<div class="modal-overlay" id="createGroupModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Create a New Group</h3>
+      <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+    </div>
+    <form method="post" action="{% url 'community:create_group' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Group Name</label>
+        <input type="text" name="name" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="3" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Visibility</label>
+        <select name="visibility" class="form-select">
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Cover Image (Optional)</label>
+        <input type="file" name="cover_image" class="form-control" accept="image/*" />
+      </div>
+      <button type="submit" class="pill-btn" style="width: 100%;">Create Group</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panes = {
+    all: document.getElementById('tab-all'),
+    mine: document.getElementById('tab-mine'),
+    discuss: document.getElementById('tab-discuss')
+  };
+  
+  tabs.forEach(btn => btn.addEventListener('click', ev => {
+    const tab = btn.dataset.tab;
+    tabs.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    Object.values(panes).forEach(p => {
+      if (p) p.classList.add('d-none');
+    });
+    
+    if (tab === 'create') {
+      document.getElementById('createGroupModal').classList.add('active');
+    } else if (panes[tab]) {
+      panes[tab].classList.remove('d-none');
+    }
+  }));
+  
+  // Close modal on outside click
+  document.getElementById('createGroupModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeCreateModal();
+    }
+  });
+})();
+
+function closeCreateModal() {
+  document.getElementById('createGroupModal').classList.remove('active');
+}
+
+function joinGroup(groupId) {
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/community/group/' + groupId + '/join/';
+  
+  const csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (csrf) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'csrfmiddlewaretoken';
+    input.value = csrf.value;
+    form.appendChild(input);
+  }
+  
+  document.body.appendChild(form);
+  form.submit();
+}
+</script>
+{% endblock %}
+
+

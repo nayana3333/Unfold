@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4>Delete Your Account</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Are you sure you want to delete your account?</p>
+                    <p>This action will permanently delete:</p>
+                    <ul>
+                        <li>Your profile information</li>
+                        <li>All your posts and comments</li>
+                        <li>Any other data associated with your account</li>
+                    </ul>
+                    <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-danger">Yes, delete my account</button>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Counselor Dashboard - Unfold{% endblock %}
+
+{% block content %}
+<div class="dashboard-container care-dashboard-shell">
+  <section class="dashboard-header care-dashboard-hero">
+    <span class="section-kicker">Counselor workspace</span>
+    <h1>Care operations dashboard.</h1>
+    <p>Review your profile, slots, and recent appointment requests from one focused workspace.</p>
+  </section>
+
+  {% if not profile %}
+    <section class="dashboard-card care-empty-state">
+      <span class="empty-eyebrow">Setup needed</span>
+      <h3>No psychiatrist profile found.</h3>
+      <p>Please ask the admin to create and verify your psychiatrist profile before accepting sessions.</p>
+    </section>
+  {% else %}
+    <section class="dashboard-card care-profile-card">
+      <div>
+        <span class="empty-eyebrow">Verified profile</span>
+        <h2>{{ profile.full_name }}</h2>
+        <p>{{ profile.specialization|default:'General counseling' }} &middot; {{ profile.years_experience }} years experience</p>
+      </div>
+      <div class="care-profile-meta">
+        {% if profile.is_verified %}<span class="status-badge status-completed">Verified</span>{% endif %}
+        <span>License: {{ profile.license_no }}</span>
+        <span>Languages: {{ profile.languages|default:'Not added' }}</span>
+        <span>
+          Modes:
+          {% if profile.available_chat %}<i class="fa-regular fa-comment-dots"></i> Chat{% endif %}
+          {% if profile.available_voice %}<i class="fa-solid fa-phone"></i> Voice{% endif %}
+          {% if profile.available_video %}<i class="fa-solid fa-video"></i> Video{% endif %}
+        </span>
+      </div>
+    </section>
+
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <section class="dashboard-card">
+          <div class="section-row-title">
+            <h4>Upcoming slots</h4>
+            <span>{{ slots|length }} total</span>
+          </div>
+          <div class="care-list">
+            {% for s in slots %}
+              <div class="booking-item">
+                <div>
+                  <strong>{{ s.start|date:"M d, g:i A" }}</strong>
+                  <span>{{ s.end|date:"g:i A" }}</span>
+                </div>
+                <span class="status-badge {% if s.is_booked %}status-confirmed{% else %}status-completed{% endif %}">
+                  {% if s.is_booked %}Booked{% else %}Open{% endif %}
+                </span>
+              </div>
+            {% empty %}
+              <div class="care-mini-empty">No slots yet. Add availability from Django Admin.</div>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+
+      <div class="col-lg-6">
+        <section class="dashboard-card">
+          <div class="section-row-title">
+            <h4>Recent bookings</h4>
+            <span>{{ bookings|length }} total</span>
+          </div>
+          <div class="care-list">
+            {% for b in bookings %}
+              <div class="booking-item">
+                <div>
+                  <strong>{{ b.user.username }}</strong>
+                  <span>{{ b.mode|title }} &middot; {{ b.slot.start|date:"M d, g:i A" }}</span>
+                  {% if b.allow_anonymous and b.pseudonym %}
+                    <small>Pseudonym: {{ b.pseudonym }}</small>
+                  {% endif %}
+                </div>
+                <span class="status-badge status-{{ b.status }}">{{ b.get_status_display }}</span>
+              </div>
+            {% empty %}
+              <div class="care-mini-empty">No bookings yet.</div>
+            {% endfor %}
+          </div>
+        </section>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
