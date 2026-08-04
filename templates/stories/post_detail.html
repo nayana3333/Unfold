@@ -66,6 +66,11 @@
           <i class="fa-{% if saved %}solid{% else %}regular{% endif %} fa-bookmark"></i>
         </button>
         <span><strong id="like-count-{{ post.id }}">{{ post.like_set.count }}</strong> likes</span>
+        {% if user.is_authenticated %}
+        <a class="post-action report" href="{% url 'moderation:create_report' 'stories' 'post' post.id %}?next={{ request.path }}" title="Report" aria-label="Report post">
+          <i class="fa-regular fa-flag"></i>
+        </a>
+        {% endif %}
       </div>
 
       <div class="detail-comments">
@@ -74,6 +79,11 @@
           <div class="detail-comment">
             <strong>{{ comment.user.username }}</strong>
             <span>{{ comment.text }}</span>
+            {% if user.is_authenticated %}
+            <a class="comment-report" href="{% url 'moderation:create_report' 'stories' 'comment' comment.id %}?next={{ request.path }}" title="Report comment" aria-label="Report comment">
+              <i class="fa-regular fa-flag"></i>
+            </a>
+            {% endif %}
           </div>
         {% empty %}
           <p class="detail-muted">No comments yet. Start the conversation.</p>
