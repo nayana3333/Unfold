@@ -45,7 +45,7 @@
   .profile-avatar-fallback {
     display: grid;
     place-items: center;
-    color: #9d4259;
+    color: var(--uf-rose-dark);
     font-size: 2.65rem;
     font-weight: 900;
   }
@@ -74,7 +74,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    border: 1px solid #ead1d6;
+    border: 1px solid var(--uf-line);
     background: #fff;
     color: #8d3f55;
     border-radius: 999px;
@@ -87,7 +87,7 @@
   .profile-chip.primary {
     background: #fff;
     border-color: #fff;
-    color: #9d4259;
+    color: var(--uf-rose-dark);
     box-shadow: 0 10px 24px rgba(72, 24, 38, 0.12);
   }
 
@@ -95,7 +95,7 @@
   .profile-cover .profile-chip *,
   .profile-cover .profile-chip.primary,
   .profile-cover .profile-chip.primary * {
-    color: #9d4259 !important;
+    color: var(--uf-rose-dark) !important;
   }
 
   .profile-cover .profile-username,
@@ -177,7 +177,7 @@
   .profile-side-card,
   .profile-modal-panel {
     background: #fff;
-    border: 1px solid var(--line, #e7dedb);
+    border: 1px solid var(--line, var(--uf-line));
     border-radius: 20px;
     box-shadow: 0 14px 30px rgba(126, 45, 67, 0.08);
   }
@@ -204,7 +204,7 @@
   .profile-form input,
   .profile-form textarea {
     width: 100%;
-    border: 1px solid #e6cbd0;
+    border: 1px solid var(--uf-line);
     background: #fffdfa;
     padding: 11px 12px;
     margin-bottom: 13px;
@@ -238,8 +238,8 @@
   }
 
   .profile-action {
-    border: 1px solid #171113;
-    background: #171113;
+    border: 1px solid var(--uf-ink);
+    background: var(--uf-ink);
     color: #fff;
     padding: 10px 16px;
     font-weight: 850;
@@ -253,7 +253,7 @@
 
   .profile-action.secondary {
     background: #fff;
-    color: #171113;
+    color: var(--uf-ink);
     border-color: #e3ccd1;
   }
 
@@ -262,7 +262,7 @@
     align-items: center;
     justify-content: center;
     gap: 18px;
-    border-bottom: 1px solid var(--line, #e7dedb);
+    border-bottom: 1px solid var(--line, var(--uf-line));
     margin-bottom: 18px;
   }
 
@@ -280,8 +280,8 @@
   }
 
   .profile-tab.active {
-    color: #171113;
-    border-bottom-color: #171113;
+    color: var(--uf-ink);
+    border-bottom-color: var(--uf-ink);
   }
 
   .tab-panel {
@@ -324,7 +324,7 @@
     display: flex;
     align-items: flex-end;
     padding: 16px;
-    color: #171113;
+    color: var(--uf-ink);
     font-weight: 800;
     background: linear-gradient(135deg, #fff8f8, #f7e4df);
   }
@@ -363,7 +363,7 @@
 
   .profile-story-card,
   .profile-list-item {
-    border: 1px solid #ead1d6;
+    border: 1px solid var(--uf-line);
     background: #fffdfa;
     color: inherit;
     text-decoration: none;
@@ -380,7 +380,7 @@
   .profile-story-thumb {
     width: 82px;
     height: 82px;
-    background: #f7e6ea;
+    background: var(--uf-line);
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -411,7 +411,7 @@
   }
 
   .profile-empty {
-    border: 1px dashed #e6cbd0;
+    border: 1px dashed var(--uf-line);
     background: #fffdfa;
     padding: 34px;
     text-align: center;

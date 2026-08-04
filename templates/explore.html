@@ -15,7 +15,7 @@
     gap: 26px;
     align-items: end;
     padding: 34px 0 28px;
-    border-bottom: 1px solid var(--line, #e7dedb);
+    border-bottom: 1px solid var(--line, var(--uf-line));
     margin-bottom: 24px;
   }
 
@@ -38,7 +38,7 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 10px;
-    border: 1px solid #e6cbd0;
+    border: 1px solid var(--uf-line);
     background: #fff;
     padding: 10px 10px 10px 14px;
   }
@@ -52,8 +52,8 @@
 
   .explore-search button,
   .explore-link-btn {
-    border: 1px solid #171113;
-    background: #171113;
+    border: 1px solid var(--uf-ink);
+    background: var(--uf-ink);
     color: #fff;
     padding: 9px 14px;
     font-weight: 850;
@@ -69,7 +69,7 @@
 
   .explore-stat {
     background: #fff;
-    border: 1px solid #ead1d6;
+    border: 1px solid var(--uf-line);
     padding: 16px;
   }
 
@@ -80,14 +80,14 @@
   }
 
   .explore-stat span {
-    color: #75696c;
+    color: var(--uf-muted);
     font-size: 0.85rem;
   }
 
   .explore-section,
   .explore-panel {
     background: #fff;
-    border: 1px solid var(--line, #e7dedb);
+    border: 1px solid var(--line, var(--uf-line));
     padding: 18px;
   }
 
@@ -109,7 +109,7 @@
   }
 
   .section-heading-row a {
-    color: #171113;
+    color: var(--uf-ink);
     font-weight: 850;
     text-decoration: none;
   }
@@ -206,7 +206,7 @@
     width: 54px;
     height: 54px;
     border-radius: 50%;
-    background: #f7e6ea;
+    background: var(--uf-line);
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -228,11 +228,11 @@
 
   .explore-panel strong {
     display: block;
-    color: #171113;
+    color: var(--uf-ink);
   }
 
   .explore-panel small {
-    color: #75696c;
+    color: var(--uf-muted);
   }
 
   .explore-side-label {
@@ -244,9 +244,9 @@
   }
 
   .explore-empty {
-    border: 1px dashed #e6cbd0;
+    border: 1px dashed var(--uf-line);
     background: #fffdfa;
-    color: #75696c;
+    color: var(--uf-muted);
     padding: 24px;
     text-align: center;
   }

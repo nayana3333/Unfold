@@ -1,11 +1,11 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 {% block title %}Register - Unfold{% endblock %}
 
 {% block extra_head %}
 <style>
   body {
-    background: #FFF4F7;
+    background: var(--uf-soft);
   }
   
   .auth-container {
@@ -17,7 +17,7 @@
   .auth-card {
     background: white;
     border-radius: 20px;
-    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    box-shadow: 0 8px 24px rgba(243, 134, 155, 0.12);
     padding: 40px;
   }
   
@@ -53,7 +53,7 @@
   .form-control {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid rgba(244, 166, 181, 0.3);
+    border: 2px solid rgba(243, 134, 155, 0.3);
     border-radius: 12px;
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
@@ -63,8 +63,8 @@
   
   .form-control:focus {
     outline: none;
-    border-color: #F4A6B5;
-    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+    border-color: var(--uf-rose);
+    box-shadow: 0 0 0 3px rgba(243, 134, 155, 0.1);
   }
   
   .form-control::placeholder {
@@ -85,7 +85,7 @@
   
   .auth-btn {
     width: 100%;
-    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    background: linear-gradient(135deg, #ff7087 0%, #f79caf 100%);
     color: white;
     border: none;
     border-radius: 12px;
@@ -99,7 +99,7 @@
   
   .auth-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(244, 166, 181, 0.3);
+    box-shadow: 0 6px 20px rgba(243, 134, 155, 0.3);
   }
   
   .auth-footer {
@@ -116,14 +116,14 @@
   }
   
   .auth-footer a {
-    color: #F4A6B5;
+    color: var(--uf-rose);
     font-weight: 600;
     text-decoration: none;
     transition: color 0.2s ease;
   }
   
   .auth-footer a:hover {
-    color: #F88379;
+    color: var(--uf-rose-dark);
     text-decoration: underline;
   }
   

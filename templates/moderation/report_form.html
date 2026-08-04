@@ -1,14 +1,14 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Report Content - Unfold{% endblock %}
 
 {% block content %}
 <div style="max-width: 720px; margin: 0 auto; padding: 32px 20px 56px;">
-  <section style="background: #fff; border: 1px solid var(--line, #e4ded7); padding: 28px;">
+  <section style="background: #fff; border: 1px solid var(--line, var(--uf-line)); padding: 28px;">
     <div class="section-kicker">Trust and safety</div>
     <h1 style="margin: 8px 0 10px;">Report content</h1>
     <p class="text-muted" style="margin-bottom: 22px;">Use this when content feels unsafe, abusive, private, misleading, or harmful. Reports go to staff moderation.</p>
-    <div style="border: 1px solid var(--line, #e4ded7); background: var(--surface-soft, #fbf7f4); padding: 14px 16px; margin-bottom: 20px;">
+    <div style="border: 1px solid var(--line, var(--uf-line)); background: var(--surface-soft, #fbf7f4); padding: 14px 16px; margin-bottom: 20px;">
       <strong>Reporting {{ target_type }}</strong>
       <p class="text-muted" style="margin: 6px 0 0;">{{ target|truncatechars:180 }}</p>
     </div>

@@ -1,10 +1,10 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Unfold - Community{% endblock %}
 
 {% block extra_head %}
 <style>
   body {
-    background: #FFF4F7;
+    background: var(--uf-soft);
   }
   
   .community-container {
@@ -14,10 +14,10 @@
   }
   
   .community-header {
-    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    background: linear-gradient(135deg, #ff7087 0%, #f79caf 100%);
     color: white;
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    box-shadow: 0 8px 24px rgba(243, 134, 155, 0.12);
     padding: 24px;
     text-align: center;
     margin-bottom: 24px;
@@ -86,7 +86,7 @@
   
   .group-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(244, 166, 181, 0.15);
+    box-shadow: 0 4px 16px rgba(243, 134, 155, 0.15);
     text-decoration: none;
     color: inherit;
   }
@@ -114,7 +114,7 @@
   }
   
   .join-btn {
-    background: #F4A6B5;
+    background: var(--uf-rose);
     border: none;
     color: white;
     border-radius: 20px;
@@ -128,7 +128,7 @@
   }
   
   .join-btn:hover {
-    background: #F88379;
+    background: var(--uf-rose-dark);
     color: white;
   }
   
@@ -173,8 +173,8 @@
   
   .suggested-item .btn {
     background: white;
-    color: #F4A6B5;
-    border: 2px solid #F4A6B5;
+    color: var(--uf-rose);
+    border: 2px solid var(--uf-rose);
     border-radius: 20px;
     padding: 4px 12px;
     font-size: 12px;
@@ -186,9 +186,9 @@
   }
   
   .suggested-item .btn:hover {
-    background: #FFF5F9;
-    color: #F88379;
-    border-color: #F88379;
+    background: var(--uf-soft);
+    color: var(--uf-rose-dark);
+    border-color: var(--uf-rose-dark);
   }
   
   .member-dot {
@@ -213,19 +213,19 @@
   }
   
   .form-control {
-    border: 2px solid rgba(244, 166, 181, 0.3);
+    border: 2px solid rgba(243, 134, 155, 0.3);
     border-radius: 12px;
     padding: 8px 12px;
   }
   
   .form-control:focus {
-    border-color: #F4A6B5;
+    border-color: var(--uf-rose);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+    box-shadow: 0 0 0 3px rgba(243, 134, 155, 0.1);
   }
   
   .pill-btn {
-    background: #F4A6B5;
+    background: var(--uf-rose);
     border: none;
     color: white;
     border-radius: 20px;
@@ -237,7 +237,7 @@
   }
   
   .pill-btn:hover {
-    background: #F88379;
+    background: var(--uf-rose-dark);
   }
   
   .discussion-item {
@@ -247,7 +247,7 @@
   }
   
   .discussion-item:hover {
-    background: #FFF5F9;
+    background: var(--uf-soft);
   }
   
   .discussion-item:last-child {
@@ -437,10 +437,10 @@
               <div>
                 <strong>{{ discussion.author.username }}</strong>
                 <span class="text-muted">&middot; {{ discussion.created_at|timesince }} ago</span>
-                <div class="small text-muted">in <a href="{% url 'community:group_detail' discussion.group.pk %}" style="color: #F4A6B5;">{{ discussion.group.name }}</a></div>
+                <div class="small text-muted">in <a href="{% url 'community:group_detail' discussion.group.pk %}" style="color: var(--uf-rose);">{{ discussion.group.name }}</a></div>
               </div>
               {% if discussion.is_pinned %}
-              <span class="badge" style="background: #F4A6B5; color: white;">Pinned</span>
+              <span class="badge" style="background: var(--uf-rose); color: white;">Pinned</span>
               {% endif %}
             </div>
             {% if discussion.title %}
@@ -448,7 +448,7 @@
             {% endif %}
             <div style="color: #666; margin-bottom: 8px;">{{ discussion.content|truncatewords:30 }}</div>
             <div class="small text-muted">
-              <a href="{% url 'community:discussion_detail' discussion.pk %}" style="color: #F4A6B5; text-decoration: none;">
+              <a href="{% url 'community:discussion_detail' discussion.pk %}" style="color: var(--uf-rose); text-decoration: none;">
                 {{ discussion.comment_count }} replies &middot; {{ discussion.like_count }} likes
               </a>
             </div>

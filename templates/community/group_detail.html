@@ -5,7 +5,7 @@
 {% block extra_head %}
 <style>
   body {
-    background: #FFF4F7;
+    background: var(--uf-soft);
   }
   
   .group-detail-container {
@@ -15,12 +15,12 @@
   }
   
   .group-header {
-    background: linear-gradient(135deg, #F88379, #F4A6B5);
+    background: linear-gradient(135deg, #ff7087 0%, #f79caf 100%);
     color: white;
     border-radius: 16px;
     padding: 32px;
     margin-bottom: 24px;
-    box-shadow: 0 8px 24px rgba(244, 166, 181, 0.12);
+    box-shadow: 0 8px 24px rgba(243, 134, 155, 0.12);
   }
   
   .group-header h1 {
@@ -57,12 +57,12 @@
   
   .action-btn:hover {
     background: white;
-    color: #F88379;
+    color: var(--uf-rose-dark);
   }
   
   .action-btn.primary {
     background: white;
-    color: #F88379;
+    color: var(--uf-rose-dark);
   }
   
   .action-btn.primary:hover {
@@ -79,11 +79,11 @@
   }
   
   .discussion-card:hover {
-    box-shadow: 0 4px 16px rgba(244, 166, 181, 0.15);
+    box-shadow: 0 4px 16px rgba(243, 134, 155, 0.15);
   }
   
   .discussion-card.pinned {
-    border-left: 4px solid #F4A6B5;
+    border-left: 4px solid var(--uf-rose);
   }
   
   .discussion-header {
@@ -125,11 +125,11 @@
   }
   
   .like-btn:hover {
-    color: #F4A6B5;
+    color: var(--uf-rose);
   }
   
   .like-btn.liked {
-    color: #F4A6B5;
+    color: var(--uf-rose);
   }
   
   .create-discussion-card {
@@ -141,20 +141,20 @@
   }
   
   .form-control, .form-select {
-    border: 2px solid rgba(244, 166, 181, 0.3);
+    border: 2px solid rgba(243, 134, 155, 0.3);
     border-radius: 12px;
     padding: 10px 16px;
     font-size: 14px;
   }
   
   .form-control:focus, .form-select:focus {
-    border-color: #F4A6B5;
+    border-color: var(--uf-rose);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(244, 166, 181, 0.1);
+    box-shadow: 0 0 0 3px rgba(243, 134, 155, 0.1);
   }
   
   .submit-btn {
-    background: #F4A6B5;
+    background: var(--uf-rose);
     border: none;
     color: white;
     border-radius: 20px;
@@ -165,7 +165,7 @@
   }
   
   .submit-btn:hover {
-    background: #F88379;
+    background: var(--uf-rose-dark);
   }
   
   .members-sidebar {
@@ -208,7 +208,7 @@
     border-radius: 999px;
     padding: 8px 14px;
     font-weight: 800;
-    color: #9d4259;
+    color: var(--uf-rose-dark);
   }
 
   .manager-actions {
@@ -291,10 +291,10 @@
               <strong>{{ discussion.author.username }}</strong>
               <span class="text-muted">&middot; {{ discussion.created_at|timesince }} ago</span>
               {% if discussion.is_pinned %}
-              <span class="badge" style="background: #F4A6B5; color: white; margin-left: 8px;">Pinned</span>
+              <span class="badge" style="background: var(--uf-rose); color: white; margin-left: 8px;">Pinned</span>
               {% endif %}
               {% if discussion.is_closed %}
-              <span class="badge" style="background: #9d4259; color: white; margin-left: 8px;">Closed</span>
+              <span class="badge" style="background: var(--uf-rose-dark); color: white; margin-left: 8px;">Closed</span>
               {% endif %}
             </div>
           </div>
@@ -371,7 +371,7 @@
         {% endfor %}
         {% if member_count > 10 %}
         <div class="text-center mt-3">
-          <a href="#" class="small" style="color: #F4A6B5;">View all members</a>
+          <a href="#" class="small" style="color: var(--uf-rose);">View all members</a>
         </div>
         {% endif %}
       </div>

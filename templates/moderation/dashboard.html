@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Moderation - Unfold{% endblock %}
 
@@ -14,7 +14,7 @@
   .ops-stat,
   .ops-panel {
     background: #fff;
-    border: 1px solid var(--line, #e4ded7);
+    border: 1px solid var(--line, var(--uf-line));
     box-shadow: none;
   }
 
@@ -31,7 +31,7 @@
   }
 
   .moderation-hero p {
-    color: var(--muted, #64605d);
+    color: var(--muted, var(--uf-muted));
     max-width: 700px;
     margin: 0;
   }
@@ -55,7 +55,7 @@
   }
 
   .ops-stat span {
-    color: var(--muted, #64605d);
+    color: var(--muted, var(--uf-muted));
     font-size: 0.86rem;
   }
 
@@ -71,7 +71,7 @@
   }
 
   .ops-item {
-    border-top: 1px solid var(--line, #e4ded7);
+    border-top: 1px solid var(--line, var(--uf-line));
     padding: 14px 0;
   }
 
@@ -82,7 +82,7 @@
 
   .ops-item p {
     margin: 4px 0 0;
-    color: var(--muted, #64605d);
+    color: var(--muted, var(--uf-muted));
   }
 
   .ops-actions {
@@ -108,9 +108,9 @@
   }
 
   .empty-note {
-    color: var(--muted, #64605d);
+    color: var(--muted, var(--uf-muted));
     margin: 0;
-    border: 1px dashed var(--line, #e4ded7);
+    border: 1px dashed var(--line, var(--uf-line));
     background: var(--surface-soft, #fbf7f4);
     padding: 16px;
   }
@@ -124,7 +124,7 @@
   }
 
   .roadmap-lead {
-    color: var(--muted, #64605d);
+    color: var(--muted, var(--uf-muted));
     margin: 0 0 16px;
   }
 
@@ -137,7 +137,7 @@
   }
 
   .roadmap-steps li {
-    border: 1px solid var(--line, #e4ded7);
+    border: 1px solid var(--line, var(--uf-line));
     background: var(--surface-soft, #fbf7f4);
     padding: 12px 14px;
   }
@@ -148,7 +148,7 @@
   }
 
   .roadmap-steps span {
-    color: var(--muted, #64605d);
+    color: var(--muted, var(--uf-muted));
     font-size: 0.9rem;
   }
 
@@ -159,7 +159,7 @@
   }
 
   .roadmap-status {
-    border: 1px solid var(--line, #e4ded7);
+    border: 1px solid var(--line, var(--uf-line));
     padding: 12px;
     text-align: center;
     font-weight: 800;
@@ -168,7 +168,7 @@
 
   .roadmap-status span {
     display: block;
-    color: var(--muted, #64605d);
+    color: var(--muted, var(--uf-muted));
     font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.08em;
