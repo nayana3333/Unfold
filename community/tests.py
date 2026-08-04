@@ -71,6 +71,64 @@ class CommunityFlowTests(TestCase):
         self.assertTrue(self.discussion.is_pinned)
         self.assertTrue(self.discussion.is_closed)
 
+    def test_private_group_detail_hidden_from_non_members(self):
+        private_group = Group.objects.create(
+            name="Private",
+            description="Invite only",
+            creator=self.owner,
+            visibility="private",
+        )
+        GroupMember.objects.create(group=private_group, user=self.owner, role="admin")
+        self.client.login(username="outsider", password="pass12345")
+
+        response = self.client.get(reverse("community:group_detail", args=[private_group.id]))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_private_group_detail_visible_to_members(self):
+        private_group = Group.objects.create(
+            name="Private",
+            description="Invite only",
+            creator=self.owner,
+            visibility="private",
+        )
+        GroupMember.objects.create(group=private_group, user=self.owner, role="admin")
+        self.client.login(username="owner", password="pass12345")
+
+        response = self.client.get(reverse("community:group_detail", args=[private_group.id]))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_private_discussion_hidden_from_non_members(self):
+        private_group = Group.objects.create(
+            name="Private",
+            description="Invite only",
+            creator=self.owner,
+            visibility="private",
+        )
+        GroupMember.objects.create(group=private_group, user=self.owner, role="admin")
+        private_discussion = Discussion.objects.create(
+            group=private_group,
+            author=self.owner,
+            title="Members only",
+            content="Sensitive content.",
+        )
+        self.client.login(username="outsider", password="pass12345")
+
+        response = self.client.get(reverse("community:discussion_detail", args=[private_discussion.id]))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_discussion_detail_shows_report_link(self):
+        self.client.login(username="member", password="pass12345")
+
+        response = self.client.get(reverse("community:discussion_detail", args=[self.discussion.id]))
+
+        self.assertContains(
+            response,
+            reverse("moderation:create_report", args=["community", "discussion", self.discussion.id]),
+        )
+
     def test_closed_discussion_blocks_new_comments(self):
         self.discussion.is_closed = True
         self.discussion.save(update_fields=["is_closed"])

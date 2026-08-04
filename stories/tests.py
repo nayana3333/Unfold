@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
@@ -75,3 +76,39 @@ class AnonymousPublishingTests(TestCase):
         story = Story.objects.get(user=self.user)
         self.assertFalse(story.is_anonymous)
         self.assertEqual(story.pseudonym, "")
+
+    def test_post_detail_shows_report_link(self):
+        post = Post.objects.create(author=self.user, content="Reportable content")
+        other = User.objects.create_user(username="viewer", password="StrongPass123!")
+        self.client.login(username="viewer", password="StrongPass123!")
+
+        response = self.client.get(reverse("stories:post_detail", args=[post.id]))
+
+        self.assertContains(
+            response,
+            reverse("moderation:create_report", args=["stories", "post", post.id]),
+        )
+
+    def test_post_rejects_disallowed_file_extension(self):
+        self.client.login(username="nayana", password="StrongPass123!")
+        malicious = SimpleUploadedFile("payload.exe", b"MZ fake binary", content_type="application/octet-stream")
+
+        response = self.client.post(
+            reverse("stories:post_create"),
+            {"content": "Sharing an attachment.", "allow_comments": "on", "file": malicious},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Post.objects.filter(content="Sharing an attachment.").exists())
+
+    def test_post_accepts_allowed_file_extension(self):
+        self.client.login(username="nayana", password="StrongPass123!")
+        attachment = SimpleUploadedFile("notes.txt", b"hello", content_type="text/plain")
+
+        response = self.client.post(
+            reverse("stories:post_create"),
+            {"content": "Sharing a text file.", "allow_comments": "on", "file": attachment},
+        )
+
+        self.assertRedirects(response, reverse("home"))
+        self.assertTrue(Post.objects.filter(content="Sharing a text file.").exists())
