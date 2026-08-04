@@ -11,14 +11,8 @@ try:
     from openai import OpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
-    try:
-        import openai
-        OpenAI = None
-        OPENAI_AVAILABLE = True
-    except ImportError:
-        openai = None
-        OpenAI = None
-        OPENAI_AVAILABLE = False
+    OpenAI = None
+    OPENAI_AVAILABLE = False
 
 
 DISTRESS_KEYWORDS = (
@@ -171,25 +165,15 @@ def call_openai(messages):
         return None
 
     global openai_client
-    if OpenAI:
-        if openai_client is None:
-            openai_client = OpenAI(api_key=api_key)
-        response = openai_client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
-            messages=messages,
-            max_tokens=int(os.getenv("CHATBOT_MAX_TOKENS", "340")),
-            temperature=float(os.getenv("CHATBOT_TEMPERATURE", "0.65")),
-        )
-        return response.choices[0].message.content.strip()
-
-    openai.api_key = api_key
-    response = openai.ChatCompletion.create(
+    if openai_client is None:
+        openai_client = OpenAI(api_key=api_key)
+    response = openai_client.chat.completions.create(
         model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
         messages=messages,
         max_tokens=int(os.getenv("CHATBOT_MAX_TOKENS", "340")),
         temperature=float(os.getenv("CHATBOT_TEMPERATURE", "0.65")),
     )
-    return response.choices[0].message["content"].strip()
+    return response.choices[0].message.content.strip()
 
 
 def local_answer(text, emotion, distress, intents):
