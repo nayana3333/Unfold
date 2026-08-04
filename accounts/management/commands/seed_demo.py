@@ -16,7 +16,7 @@ from stories.models import Comment, Like, Post, PostImage, SavedPost, Story
 
 
 class Command(BaseCommand):
-    help = "Seed realistic Unfold demo data for portfolio presentations."
+    help = "Seed realistic demo data for local development and testing."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -182,8 +182,8 @@ class Command(BaseCommand):
             (users["nayana"], "Built my first calm morning routine this week: 20 minutes of walking, no phone, and one clear priority before college.", False, "", ["Morning reset", "No-phone walk", "One priority"]),
             (users["asha"], "Reminder: asking for help early is not weakness. It is maintenance.", False, "", ["Ask early", "Care plan"]),
             (users["hope"], "I said no without overexplaining today. Small win, but it felt huge.", True, "QuietBloom", ["Boundary win"]),
-            (users["meera"], "Career prep note: I made a tiny interview tracker and it made the whole process less scary.", False, "", ["Interview tracker", "Project pitch", "Resume proof"]),
-            (users["riya"], "Tiny portfolio upgrade idea: show the actual user journey, not only screenshots. Recruiters remember flows.", False, "", ["User flow", "Portfolio polish"]),
+            (users["meera"], "Practiced my answer to 'tell me about a time you failed' out loud for the first time today. It helped more than I expected.", False, "", ["Practice run", "Said it out loud", "Felt less scary"]),
+            (users["riya"], "Spoke up first in today's meeting instead of waiting for the perfect moment. My idea actually helped move things forward.", False, "", ["Spoke first", "Real impact"]),
             (users["kavya"], "Design note I keep repeating: spacing is a feature. Calm UI makes people trust the product faster.", False, "", ["Spacing", "Trust", "UI system"]),
             (users["zoya"], "Tonight's journal prompt: what would feel lighter if I stopped carrying it alone?", False, "", ["Journal prompt"]),
             (users["tanya"], "A 10-minute stretch between study sessions changed my whole evening. Soft reset, real result.", False, "", ["Stretch reset", "Study break"]),
@@ -226,9 +226,9 @@ class Command(BaseCommand):
             (users["asha"], posts[0], "This feels doable. I am trying the no-phone morning idea tomorrow."),
             (users["meera"], posts[1], "Needed this today. Thank you for saying it plainly."),
             (users["nayana"], posts[2], "Proud of this win. Boundaries are hard work."),
-            (users["hope"], posts[3], "A tracker sounds useful. Could you share the structure?"),
-            (users["riya"], posts[3], "This is exactly the kind of system that makes interviews less chaotic."),
-            (users["kavya"], posts[4], "Yes. A flow with before/after screens makes the project feel much more senior."),
+            (users["hope"], posts[3], "Saying it out loud is such an underrated trick. Stealing this for my own prep."),
+            (users["riya"], posts[3], "This is exactly the kind of practice that makes interviews less scary."),
+            (users["kavya"], posts[4], "That takes real courage. I always wait too long to speak up."),
             (users["zoya"], posts[5], "Spacing really changes the emotion of a page. This is such a good reminder."),
             (users["tanya"], posts[6], "Writing this down for tonight. It feels gentle but honest."),
             (users["asha"], posts[7], "Soft reset is the phrase I needed today."),
@@ -242,8 +242,8 @@ class Command(BaseCommand):
         story_data = [
             (users["nayana"], "Today: study, breathe, build one small thing.", False, ""),
             (users["asha"], "Water, stretch, then work. Tiny rituals count.", False, ""),
-            (users["meera"], "Interview prep sprint: 3 questions, 1 project story.", False, ""),
-            (users["riya"], "Portfolio polish day: one flow, one bug fix, one screenshot.", False, ""),
+            (users["meera"], "Interview prep sprint: three tricky questions, one deep breath, one small win.", False, ""),
+            (users["riya"], "Practicing tomorrow's presentation: slow breaths, strong stance, one clear point.", False, ""),
             (users["kavya"], "Design check: reduce noise, increase trust.", False, ""),
             (users["zoya"], "Quiet evening. Good book. Better breathing.", True, "MoonNote"),
         ]
@@ -266,7 +266,7 @@ class Command(BaseCommand):
             ("Career Confidence Circle", "Interview preparation, resume wins, and confidence building for women starting tech careers.", users["meera"]),
             ("Calm Corner", "A gentle space for anxiety resets, routines, and emotional support.", users["asha"]),
             ("Safe Stories", "Anonymous reflections, support, and healing conversations.", users["nayana"]),
-            ("Design Glow-Up", "UI reviews, portfolio polish, product thinking, and clean frontend standards.", users["kavya"]),
+            ("Creative Minds Collective", "A space for designers, writers, and makers to talk through creative block, feedback, and confidence in their craft.", users["kavya"]),
             ("Student Reset Club", "Study routines, burnout prevention, and small recovery rituals.", users["tanya"]),
         ]
         groups = []
@@ -290,11 +290,11 @@ class Command(BaseCommand):
 
     def create_discussions(self, users, groups):
         items = [
-            (groups[0], users["meera"], "How I explain this project in interviews", "I am practicing a 60-second pitch: problem, users, features, tech, and impact. What should I improve?", True),
-            (groups[0], users["nayana"], "Resume project checklist", "Adding deployment, README screenshots, real test data, and one strong AI feature before applying.", False),
+            (groups[0], users["meera"], "Nerves before a big interview", "I have a second-round interview tomorrow and my mind keeps jumping to worst-case scenarios. How do you calm down before something this important?", True),
+            (groups[0], users["nayana"], "Negotiating salary for the first time", "I got an offer but the number feels low. I have never negotiated before and I am nervous about pushing back.", False),
             (groups[1], users["asha"], "Two-minute reset that works for me", "Name five things you see, unclench your jaw, breathe out longer than you breathe in.", True),
             (groups[2], users["hope"], "How do you ask for support?", "I want to ask a friend for help but I keep feeling like a burden.", False),
-            (groups[3], users["kavya"], "What makes a page look senior?", "For me: consistent spacing, clear hierarchy, fewer random colors, and real empty states.", True),
+            (groups[3], users["kavya"], "How do you handle harsh feedback?", "A client called my last piece 'flat' with zero context. Still stings. How do you reset after critical feedback?", True),
             (groups[4], users["tanya"], "Study burnout reset ideas", "What helps when your mind is tired but deadlines are still close?", False),
         ]
         discussions = []
@@ -319,12 +319,12 @@ class Command(BaseCommand):
                     DiscussionLike.objects.get_or_create(discussion=discussion, user=user)
 
         comments = [
-            (discussions[0], users["nayana"], "Mention the safety angle and role-based dashboards. That sounds strong."),
-            (discussions[1], users["meera"], "Screenshots will help a lot. Recruiters understand faster with visuals."),
+            (discussions[0], users["nayana"], "Box breathing helped me a lot before my last interview. In for four, hold for four, out for four."),
+            (discussions[1], users["meera"], "Ask for 24 hours to think it over first. It gives you room to breathe and come back with a clear number."),
             (discussions[2], users["hope"], "The longer exhale part really helps me too."),
             (discussions[3], users["asha"], "You can ask with one clear sentence: I am having a hard day, can you sit with me for ten minutes?"),
-            (discussions[4], users["riya"], "Also consistent button states. Hover, active, disabled - all of it matters."),
-            (discussions[4], users["nayana"], "This is going into my checklist before screenshots."),
+            (discussions[4], users["riya"], "I write down what's useful and let the rest go within 24 hours. Otherwise it lives in my head for a week."),
+            (discussions[4], users["nayana"], "Following this. I take everything personally and I am trying to change that."),
             (discussions[5], users["zoya"], "A shower, food, and one tiny next step. Not the whole deadline at once."),
             (discussions[5], users["meera"], "I use a 25-minute sprint and write down exactly what done means."),
         ]
@@ -382,7 +382,7 @@ class Command(BaseCommand):
             "asha_writes": "Writer, listener, and gentle routine builder.",
             "meera_codes": "Frontend learner preparing for web development interviews.",
             "hope_anonymous": "Here to learn, heal, and share quietly.",
-            "riya_builds": "Project-first learner turning ideas into portfolio-ready products.",
+            "riya_builds": "Marketing associate learning to speak up in rooms that used to intimidate her.",
             "kavya.design": "Frontend designer who cares about hierarchy, spacing, and warm UX.",
             "zoya_reads": "Reader, journal keeper, and believer in soft resets.",
             "tanya_moves": "Movement breaks, study plans, and practical calm.",
@@ -393,9 +393,9 @@ class Command(BaseCommand):
         values = {
             "nayanademo": "web development, mindfulness, interview prep",
             "asha_writes": "journaling, wellness, peer support",
-            "meera_codes": "React, portfolios, confidence",
+            "meera_codes": "coding, interview prep, confidence",
             "hope_anonymous": "healing, boundaries, calm spaces",
-            "riya_builds": "portfolio, Django, product flows",
+            "riya_builds": "public speaking, career growth, confidence",
             "kavya.design": "UI design, Figma, visual systems",
             "zoya_reads": "books, journaling, reflection",
             "tanya_moves": "fitness, study routines, burnout resets",
@@ -408,7 +408,7 @@ class Command(BaseCommand):
             "asha_writes": "Soft reminders for hard days.",
             "meera_codes": "Turning projects into confidence.",
             "hope_anonymous": "Choosing quiet courage.",
-            "riya_builds": "Building proof, not just plans.",
+            "riya_builds": "One brave meeting at a time.",
             "kavya.design": "Making interfaces feel clear and kind.",
             "zoya_reads": "Gentle notes for heavy days.",
             "tanya_moves": "Reset, move, continue.",
