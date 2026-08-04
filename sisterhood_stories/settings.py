@@ -27,13 +27,20 @@ def env_list(name, default=""):
     return [item.strip() for item in value.replace(",", " ").split() if item.strip()]
 
 # Read secrets & flags from environment (safe for Render)
-# Fallback values are provided for local development convenience.
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-igv*m+)4!5scp5!u2n2y(-k9lc85&@25v2b_*u3mq_xr72#y4y",  # previous dev key fallback
-)
+# Fallback values are provided for local development convenience only.
+DEV_SECRET_KEY = "django-insecure-igv*m+)4!5scp5!u2n2y(-k9lc85&@25v2b_*u3mq_xr72#y4y"
+ENV_FILE = BASE_DIR / ".env"
+SECRET_KEY = os.environ.get("SECRET_KEY", DEV_SECRET_KEY)
 
-DEBUG = env_bool("DEBUG", True)
+# A missing .env means a vanilla local checkout with no deploy config yet,
+# so default to DEBUG=True for dev convenience; once a .env exists (staging/
+# production setup) default to DEBUG=False unless explicitly overridden.
+DEBUG = env_bool("DEBUG", not ENV_FILE.exists())
+
+if not DEBUG and SECRET_KEY == DEV_SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured("SECRET_KEY must be set via environment variable when DEBUG is False.")
 
 # Keep localhost convenient while forcing explicit hosts in production.
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1 localhost")
