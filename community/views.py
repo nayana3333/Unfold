@@ -7,7 +7,6 @@ from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from .models import Group, GroupMember, Discussion, DiscussionLike, Comment
 from .forms import GroupForm, DiscussionForm, CommentForm
 
@@ -102,7 +101,14 @@ class GroupDetailView(DetailView):
     model = Group
     template_name = "community/group_detail.html"
     context_object_name = "group"
-    
+
+    def get_object(self, queryset=None):
+        group = super().get_object(queryset)
+        user = self.request.user
+        if group.visibility == 'private' and not group.is_member(user) and not (user.is_authenticated and user.is_staff):
+            raise Http404("Group not found")
+        return group
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         group = self.get_object()
@@ -204,7 +210,15 @@ class DiscussionDetailView(DetailView):
     model = Discussion
     template_name = "community/discussion_detail.html"
     context_object_name = "discussion"
-    
+
+    def get_object(self, queryset=None):
+        discussion = super().get_object(queryset)
+        user = self.request.user
+        group = discussion.group
+        if group.visibility == 'private' and not group.is_member(user) and not (user.is_authenticated and user.is_staff):
+            raise Http404("Discussion not found")
+        return discussion
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         discussion = self.get_object()
