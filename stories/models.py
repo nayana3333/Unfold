@@ -1,6 +1,12 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+
+from .validators import validate_upload_size
+
+ALLOWED_POST_FILE_EXTENSIONS = ["pdf", "doc", "docx", "txt", "png", "jpg", "jpeg", "gif"]
+ALLOWED_VIDEO_EXTENSIONS = ["mp4", "mov", "webm"]
 
 def default_expiry():
     return timezone.now() + timezone.timedelta(hours=24)
@@ -8,8 +14,16 @@ def default_expiry():
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField(blank=True)
-    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
-    file = models.FileField(upload_to='post_files/', blank=True, null=True)
+    image = models.ImageField(upload_to='post_images/', blank=True, null=True, validators=[validate_upload_size])
+    file = models.FileField(
+        upload_to='post_files/',
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=ALLOWED_POST_FILE_EXTENSIONS),
+            validate_upload_size,
+        ],
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     shared_post = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
     is_anonymous = models.BooleanField(default=False)
@@ -33,7 +47,7 @@ class Post(models.Model):
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="carousel_images")
-    image = models.ImageField(upload_to="post_images/carousel/")
+    image = models.ImageField(upload_to="post_images/carousel/", validators=[validate_upload_size])
     position = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -53,8 +67,16 @@ class Story(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     story_type = models.CharField(max_length=10, choices=STORY_TYPES, default='text')
     content = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='stories/images/', blank=True, null=True)
-    video = models.FileField(upload_to='stories/videos/', blank=True, null=True)
+    image = models.ImageField(upload_to='stories/images/', blank=True, null=True, validators=[validate_upload_size])
+    video = models.FileField(
+        upload_to='stories/videos/',
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=ALLOWED_VIDEO_EXTENSIONS),
+            validate_upload_size,
+        ],
+    )
     is_anonymous = models.BooleanField(default=False)
     pseudonym = models.CharField(max_length=80, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
